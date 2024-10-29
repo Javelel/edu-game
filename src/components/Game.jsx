@@ -1,29 +1,41 @@
-import { useState } from "react";
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Grid, Box, Typography } from '@mui/material';
 import { problems } from '../data/problems';
-import { potentialProblems } from "../data/potential-problems";
 import ProblemCard from './ProblemCard';
 import DecisionBox from './DecisionBox';
 import GameDialog from './GameDialog';
+import {
+  setBudget,
+  setTime,
+  addSolvedProblem,
+  setSelectedProblem,
+  addDynamicProblem,
+  adjustProblemChance,
+  incrementAiCount,
+  incrementCustomerSatisfaction,
+  setDialog,
+  restartGame,
+} from '../redux/reducers/gameReducer';
+import { potentialProblems } from '../data/potential-problems';
 
 const Game = () => {
-  const [budget, setBudget] = useState(20);
-  const [time, setTime] = useState(20);
-  const [selectedProblem, setSelectedProblem] = useState(null);
-  const [solvedProblems, setSolvedProblems] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMessage, setDialogMessage] = useState('');
-  const [dynamicProblems, setDynamicProblems] = useState({});
-  const [problemChances, setProblemChances] = useState(() =>
-    potentialProblems.reduce((acc, problem) => {
-      acc[problem.id] = problem.baseChance;
-      return acc;
-    }, {})
-  );
+  const dispatch = useDispatch();
+  const {
+    budget,
+    time,
+    solvedProblems,
+    selectedProblem,
+    dynamicProblems,
+    problemChances,
+    addedProblems,
+    aiCount,
+    customerSatisfaction,
+    dialogOpen,
+    dialogMessage,
+  } = useSelector((state) => state.game);
 
   const columns = ["Analiza", "Design", "Implementacja", "Testy", "Wdrożenie"];
-  const [aiCount, setAiCount] = useState(0);
-  const [customerSatisfaction, setCustomerSatisfaction] = useState(0);
 
   const canClickProblem = (categoryIndex) => {
     if (categoryIndex === 0) return true;
@@ -31,33 +43,9 @@ const Game = () => {
     return previousCategoryProblems.every(problem => solvedProblems.includes(problem.id));
   };
 
-  const adjustProblemChances = (decision) => {
-    if (decision.chanceAdjustment) {
-      setProblemChances(prev => {
-        const updatedChances = { ...prev };
-        decision.chanceAdjustment.forEach(({ problemId, change }) => {
-          updatedChances[problemId] = (updatedChances[problemId] || 0) + change;
-        });
-        return updatedChances;
-      });
-    }
-  };
-
-  const maybeAddNewProblem = () => {
-    potentialProblems.forEach(problem => {
-      if (!problem.isAdded && Math.random() < problemChances[problem.id]) {
-        setDynamicProblems(prev => ({
-          ...prev,
-          [problem.category]: [...(prev[problem.category] || []), { ...problem, isNew: true }]
-        }));
-        problem.isAdded = true;
-      }
-    });
-  };
-
   const handleCardClick = (problem, columnIndex) => {
     if (!selectedProblem && !solvedProblems.includes(problem.id) && canClickProblem(columnIndex)) {
-      setSelectedProblem(problem);
+      dispatch(setSelectedProblem(problem));
     }
   };
 
@@ -66,57 +54,55 @@ const Game = () => {
     const newTime = time - decision.timeCost;
 
     if (newTime < 0) {
-      setDialogMessage('Brak czasu');
-      setDialogOpen(true);
+      dispatch(setDialog({ open: true, message: 'Brak czasu' }));
       return;
-    } 
+    }
     if (newBudget < 0) {
-      setDialogMessage('Brak pieniędzy');
-      setDialogOpen(true);
+      dispatch(setDialog({ open: true, message: 'Brak pieniędzy' }));
       return;
-    } 
+    }
 
-    setBudget(newBudget);
-    setTime(newTime);
-    setSolvedProblems([...solvedProblems, selectedProblem.id]); 
-    setSelectedProblem(null); 
-    
-    adjustProblemChances(decision);
-    maybeAddNewProblem();
+    dispatch(setBudget(newBudget));
+    dispatch(setTime(newTime));
+    dispatch(addSolvedProblem(selectedProblem.id));
+    dispatch(setSelectedProblem(null));
+
+    if (decision.chanceAdjustment) {
+      decision.chanceAdjustment.forEach(({ problemId, change }) => {
+        dispatch(adjustProblemChance({ problemId, change }));
+      });
+    }
 
     if (decision.ai) {
-      setAiCount(aiCount + decision.ai);
+      dispatch(incrementAiCount());
     }
     if (decision.customerSatisfaction) {
-      setCustomerSatisfaction(customerSatisfaction + decision.customerSatisfaction);
+      dispatch(incrementCustomerSatisfaction());
     }
+
+    maybeAddNewProblem();
 
     const allProblemsCount = Object.values(problems).flat().length + Object.values(dynamicProblems).flat().length;
     if (solvedProblems.length + 1 === allProblemsCount) {
-      if (customerSatisfaction > 0) {
-        setDialogMessage('Brawo! Projekt się udał');
-        setDialogOpen(true);
-      } else {
-        setDialogMessage('Klient nie jest zadowolony z projektu');
-        setDialogOpen(true);
-      }
+      const message = customerSatisfaction > 0 ? 'Brawo! Projekt się udał' : 'Klient nie jest zadowolony z projektu';
+      dispatch(setDialog({ open: true, message }));
     }
   };
 
+  const maybeAddNewProblem = () => {
+    potentialProblems.forEach(problem => {
+      if (!addedProblems[problem.id] && Math.random() < problemChances[problem.id]) {
+        dispatch(addDynamicProblem({
+          category: problem.category,
+          problem: { ...problem, isNew: true }
+        }));
+      }
+    });
+  };
+
   const handleRestart = () => {
-    setBudget(20);
-    setTime(20);
-    setSolvedProblems([]);
-    setSelectedProblem(null);
-    setAiCount(0);
-    setCustomerSatisfaction(0);
-    setDialogOpen(false);
-    setDynamicProblems({});
-    setProblemChances(potentialProblems.reduce((acc, problem) => {
-      acc[problem.id] = problem.baseChance;
-      return acc;
-    }, {}));
-  }
+    dispatch(restartGame());
+  };
 
   return (
     <Box p={3}>
@@ -126,7 +112,6 @@ const Game = () => {
             <Typography variant="h6" align="center" gutterBottom>
               {categoryName}
             </Typography>
-
             {[...(categoryProblems || []), ...(dynamicProblems[categoryName] || [])].map(problem => (
               <ProblemCard
                 key={problem.id}
