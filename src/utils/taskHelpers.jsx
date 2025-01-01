@@ -1,16 +1,4 @@
-export const getNextUnsolvedTask = (columns, tasks, solvedTasks) => {
-	for (let category of columns) {
-	  const categoryTasks = tasks[category] || [];
-	  for (let task of categoryTasks) {
-		if (!solvedTasks.some(solvedTask => solvedTask.taskId === task.id)) {
-			return task;
-		  }
-	  }
-	}
-	return null;
-  };
-
-  export function getNextUnsolvedTaskWithUnexpected(
+export function getNextUnsolvedTaskWithUnexpected(
 	columns,
 	tasks,
 	solvedTasks,
