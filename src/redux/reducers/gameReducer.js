@@ -1,19 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { potentialProblems } from '../../data/potential-problems';
+import { problems } from '../../data/problems';
+
+// Funkcja pomocnicza: obsługa rzutów kostką
+const calculateCost = (cost) => {
+  if (typeof cost === 'number') return cost;
+
+  const parts = cost.split('+');
+  let total = 0;
+
+  for (const part of parts) {
+    if (part.includes('k6')) {
+      const multiplier = parseInt(part.replace('k6', ''), 10) || 1;
+      total += multiplier * Math.floor(Math.random() * 6 + 1); // Rzut kostką (1-6)
+    } else {
+      total += parseInt(part, 10);
+    }
+  }
+
+  return total;
+};
 
 const initialState = {
-  budget: 20,
-  time: 20,
+  budget: 60,
+  time: 45,
+  solvedTasks: [],
   solvedProblems: [],
+  selectedTask: null,
   selectedProblem: null,
-  dynamicProblems: {},
-  problemChances: potentialProblems.reduce((acc, problem) => {
+  dynamicProblems: [],
+  problemChances: problems.reduce((acc, problem) => {
     acc[problem.id] = problem.baseChance;
     return acc;
   }, {}),
   addedProblems: {},
-  aiCount: 0,
-  customerSatisfaction: 0,
+  customerDissatisfaction: 0,
   dialogOpen: false,
   dialogMessage: '',
 };
@@ -24,37 +44,67 @@ const gameSlice = createSlice({
   reducers: {
     setBudget: (state, action) => { state.budget = action.payload },
     setTime: (state, action) => { state.time = action.payload },
+    addSolvedTask: (state, action) => { 
+		const { taskId, decisionId } = action.payload;
+  		state.solvedTasks.push({ taskId, decisionId });
+	 },
     addSolvedProblem: (state, action) => { state.solvedProblems.push(action.payload) },
+    setSelectedTask: (state, action) => { state.selectedTask = action.payload },
     setSelectedProblem: (state, action) => { state.selectedProblem = action.payload },
     addDynamicProblem: (state, action) => {
-      const { category, problem } = action.payload;
-      if (!state.dynamicProblems[category]) state.dynamicProblems[category] = [];
-      state.dynamicProblems[category].push(problem);
+      const problem = action.payload;
+      state.dynamicProblems.push(problem);
       state.addedProblems[problem.id] = true;
     },
     adjustProblemChance: (state, action) => {
       const { problemId, change } = action.payload;
       state.problemChances[problemId] = (state.problemChances[problemId] || 0) + change;
     },
-    incrementAiCount: (state) => { state.aiCount += 1 },
-    incrementCustomerSatisfaction: (state) => { state.customerSatisfaction += 1 },
+    incrementCustomerDissatisfaction: (state, action) => {
+      state.customerDissatisfaction += action.payload || 1;
+    },
+    applyDecision: (state, action) => {
+      const decision = action.payload;
+
+      // Oblicz koszty dynamicznie
+      const budgetCost = calculateCost(decision.budgetCost);
+      const timeCost = calculateCost(decision.timeCost);
+
+      // Aktualizuj budżet i czas
+      state.budget -= budgetCost;
+      state.time -= timeCost;
+
+      // Dodaj niezadowolenie klienta (jeśli występuje)
+      if (decision.customerDissatisfaction) {
+        state.customerDissatisfaction += decision.customerDissatisfaction;
+      }
+
+      // Aktualizuj szanse wystąpienia problemów
+      if (decision.chanceAdjustment) {
+        decision.chanceAdjustment.forEach(({ problemId, change }) => {
+          state.problemChances[problemId] = (state.problemChances[problemId] || 0) + change;
+        });
+      }
+    },
     setDialog: (state, action) => {
       state.dialogOpen = action.payload.open;
       state.dialogMessage = action.payload.message;
     },
-    restartGame: () => initialState
+    restartGame: () => initialState,
   },
 });
 
 export const {
   setBudget,
   setTime,
+  addSolvedTask,
   addSolvedProblem,
+  setSelectedTask,
   setSelectedProblem,
   addDynamicProblem,
   adjustProblemChance,
-  incrementAiCount,
-  incrementCustomerSatisfaction,
+  incrementCustomerDissatisfaction,
+  applyDecision, // Dodano nową akcję
   setDialog,
   restartGame,
 } = gameSlice.actions;

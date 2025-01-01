@@ -1,29 +1,43 @@
 import { Card, CardContent, Button, Box, Typography } from '@mui/material';
 
-const DecisionBox = ({ selectedProblem, handleDecision }) => (
-  <Card variant="outlined" style={{ maxWidth: '500px', width: '100%' }}>
+const DecisionBox = ({ selectedItem, handleDecision }) => (
+  <Card variant="outlined" style={{ maxWidth: '600px', margin: '20px auto' }}>
     <CardContent>
-      <Typography variant="h5">{selectedProblem.name}</Typography>
-      <Typography variant="body1">{selectedProblem.description}</Typography>
+      <Typography variant="h5">{selectedItem.name}</Typography>
+      <Typography variant="body1">{selectedItem.description}</Typography>
 
       <Box mt={2}>
-        <Button 
-          variant="outlined" 
-          color="primary" 
-          onClick={() => handleDecision(selectedProblem.decision1)}
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => handleDecision(selectedItem.decision1)}
           style={{ marginBottom: '10px', whiteSpace: 'normal', textAlign: 'left' }}
         >
-          {selectedProblem.decision1.name} (Koszt: {selectedProblem.decision1.budgetCost} budżetu, {selectedProblem.decision1.timeCost} czasu {selectedProblem.decision1.ai ? `, AI: ${selectedProblem.decision1.ai}` : ''} {selectedProblem.decision1.customerSatisfaction !== undefined ? `, satysfakcja klienta: ${selectedProblem.decision1.customerSatisfaction}` : ''})
+          {selectedItem.decision1.name} 
+          (Koszt: {selectedItem.decision1.budgetCost} budżetu, 
+          {selectedItem.decision1.timeCost} czasu
+          {selectedItem.decision1.customerDissatisfaction !== undefined 
+            ? `, niezadowolenie klienta: ${selectedItem.decision1.customerDissatisfaction}` 
+            : ''}
+          )
         </Button>
-        
-        <Button 
-          variant="outlined" 
-          color="secondary" 
-          onClick={() => handleDecision(selectedProblem.decision2)}
-          style={{ whiteSpace: 'normal', textAlign: 'left' }}
-        >
-          {selectedProblem.decision2.name} (Koszt: {selectedProblem.decision2.budgetCost} budżetu, {selectedProblem.decision2.timeCost} czasu {selectedProblem.decision2.ai ? `, AI: ${selectedProblem.decision2.ai}` : ''} {selectedProblem.decision2.customerSatisfaction !== undefined ? `, satysfakcja klienta: ${selectedProblem.decision2.customerSatisfaction}` : ''})
-        </Button>
+
+        {selectedItem.decision2 && ( // Renderuj tylko, jeśli decision2 istnieje
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleDecision(selectedItem.decision2)}
+            style={{ whiteSpace: 'normal', textAlign: 'left' }}
+          >
+            {selectedItem.decision2.name} 
+            (Koszt: {selectedItem.decision2.budgetCost} budżetu, 
+            {selectedItem.decision2.timeCost} czasu
+            {selectedItem.decision2.customerDissatisfaction !== undefined 
+              ? `, niezadowolenie klienta: ${selectedItem.decision2.customerDissatisfaction}` 
+              : ''}
+            )
+          </Button>
+        )}
       </Box>
     </CardContent>
   </Card>
