@@ -21,8 +21,8 @@ const calculateCost = (cost) => {
 };
 
 const initialState = {
-  budget: 60,
-  time: 45,
+  budget: 70,
+  time: 55,
   solvedTasks: [],
   solvedProblems: [],
   selectedTask: null,

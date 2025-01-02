@@ -1,31 +1,48 @@
 import React from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Grid, Typography, Box } from '@mui/material';
 import TaskCard from './TaskCard';
 
 const TaskStagesGrid = ({
   columns,
   tasks,
   solvedTasks,
+  selectedTask
 }) => {
   return (
-    <Grid container spacing={2}>
-      {Object.entries(tasks).map(([categoryName, categoryTasks], colIndex) => (
-        <Grid item xs={12 / columns.length} key={colIndex}>
-          <Typography variant="h6" align="center" gutterBottom>
-            {categoryName}
-          </Typography>
-          {categoryTasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              isSolved={solvedTasks.some(solvedTask => solvedTask.taskId === task.id)}
-              isClickable={false}
-              onClick={() => {}}
-            />
-          ))}
-        </Grid>
-      ))}
-    </Grid>
+    <Box
+      style={{
+        backgroundColor: '#f5f5f5',
+        padding: '20px',
+        borderRadius: '10px',
+      }}
+    >
+      <Grid container spacing={2}>
+        {Object.entries(tasks).map(([categoryName, categoryTasks], colIndex) => (
+          <Grid item xs={12 / columns.length} key={colIndex}>
+            <Typography
+              variant="h6"
+              align="center"
+              gutterBottom
+              style={{ fontWeight: 'bold', color: '#333' }}
+            >
+              {categoryName}
+            </Typography>
+            {categoryTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                isSolved={solvedTasks.some(
+                  (solvedTask) => solvedTask.taskId === task.id
+                )}
+				isSelected={selectedTask?.id === task.id}
+                isClickable={false}
+                onClick={() => {}}
+              />
+            ))}
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 };
 

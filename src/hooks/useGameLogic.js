@@ -42,6 +42,7 @@ export default function useGameLogic() {
   const [problemNotificationMessage, setProblemNotificationMessage] = useState('');
   const [previousItem, setPreviousItem] = useState(null);
   const [unexpectedTasks, setUnexpectedTasks] = useState([]);
+  const [problemQueue, setProblemQueue] = useState([]);
 
   // -----------------------------
   // 1. Obsługa wyboru kolejnego zadania (głównego lub nieprzewidzianego)
@@ -104,6 +105,19 @@ export default function useGameLogic() {
     }
   }, [solvedTasks, solvedProblems, dynamicProblems, customerDissatisfaction, dispatch]);
 
+  useEffect(() => {
+    // Jeżeli nie wyświetlamy żadnego powiadomienia, a w kolejce jest coś
+    if (!showProblemNotification && problemQueue.length > 0) {
+      // Pobieramy pierwszy komunikat
+      const nextMessage = problemQueue[0];
+      // Ustawiamy go do wyświetlenia
+      setProblemNotificationMessage(nextMessage);
+      setShowProblemNotification(true);
+      // Usuwamy go z kolejki
+      setProblemQueue((prevQueue) => prevQueue.slice(1));
+    }
+  }, [problemQueue, showProblemNotification]);
+
   // -----------------------------
   // 4. Funkcje pomocnicze
   // -----------------------------
@@ -138,8 +152,10 @@ export default function useGameLogic() {
 
       if (problemAdded) {
         dispatch(addDynamicProblem({ ...problem, isNew: true }));
-        setProblemNotificationMessage(`Pojawił się nowy problem: ${problem.name}`);
-        setShowProblemNotification(true);
+        setProblemQueue((prevQueue) => [
+			...prevQueue,
+			`Pojawił się nowy problem: ${problem.name}`
+		  ]);
         dispatch(setSelectedTask(null));
         dispatch(setSelectedProblem(null));
       }
