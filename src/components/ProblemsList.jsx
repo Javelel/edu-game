@@ -36,7 +36,7 @@ const ProblemsList = ({ dynamicProblems, solvedProblems, onSelectProblem, select
             problem={problem}
             isSolved={!!solvedProblems.find((sp) => sp.problemId === problem.id)}
 			solvedDecision={solvedProblem?.decisionName}
-            isClickable={!solvedProblems.includes(problem.id)}
+            isClickable={!solvedProblems.find((sp) => sp.problemId === problem.id)}
             isSelected={selectedProblem?.id === problem.id}
             onClick={() => onSelectProblem(problem)}
           />

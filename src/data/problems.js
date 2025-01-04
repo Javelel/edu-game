@@ -3,7 +3,7 @@ export const problems = [
 	  id: 'WZ3-14',
 	  name: 'Słabo zdefiniowany zakres',
 	  description: 'Podejrzewamy, że mamy w zakresie niepotrzebne rzeczy.',
-	  category: 'Analiza',
+	  category: 'Implementacja',
 	  condition: {
 		baseChance: 3,
 		modifiers: [

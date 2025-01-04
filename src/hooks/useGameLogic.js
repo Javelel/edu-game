@@ -18,7 +18,6 @@ import { problems } from '../data/problems';
 import { unexpectedTasks as unexpectedTasksData } from '../data/unexpectedTasks';
 import { getNextUnsolvedTaskWithUnexpected } from '../utils/taskHelpers';
 
-// Tutaj trzymasz columns w tym samym pliku (zamiast osobnego pliku)
 const columns = ["Analiza", "Design", "Implementacja", "Testy", "Wdrożenie"];
 
 export default function useGameLogic() {
@@ -44,9 +43,18 @@ export default function useGameLogic() {
   const [unexpectedTasks, setUnexpectedTasks] = useState([]);
   const [problemQueue, setProblemQueue] = useState([]);
 
-  // -----------------------------
-  // 1. Obsługa wyboru kolejnego zadania (głównego lub nieprzewidzianego)
-  // -----------------------------
+  /**
+   * Stan pomocniczy — etapy, dla których dodano już
+   * (1) zadania niespodziewane,
+   * (2) problemy.
+   */
+  const [stagesWithUnexpectedAdded, setStagesWithUnexpectedAdded] = useState([]);
+  const [stagesWithProblemsAdded, setStagesWithProblemsAdded] = useState([]);
+
+  // Helper: rzut kostką
+  const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
+
+  // 1. Obsługa wyboru kolejnego zadania
   useEffect(() => {
     if (!selectedTask && !showProblemNotification && !selectedProblem) {
       const nextTask = getNextUnsolvedTaskWithUnexpected(
@@ -59,38 +67,129 @@ export default function useGameLogic() {
         dispatch(setSelectedTask(nextTask));
       }
     }
-  }, [selectedTask, solvedTasks, showProblemNotification, selectedProblem, dispatch, unexpectedTasks]);
+  }, [
+    selectedTask,
+    solvedTasks,
+    showProblemNotification,
+    selectedProblem,
+    dispatch,
+    unexpectedTasks
+  ]);
 
-  // -----------------------------
-  // 2. Obsługa dodawania zadań nieprzewidzianych, gdy etap jest ukończony
-  // -----------------------------
+  /**
+   * Funkcja sprawdzająca, czy WSZYSTKIE zadania bazowe + nieprzewidziane
+   * w danym etapie są rozwiązane.
+   */
+  const allTasksSolvedForStage = (stage) => {
+    // (A) Wszystkie bazowe zadania?
+    const baseTasksSolved = tasks[stage]?.every(task =>
+      solvedTasks.some(solvedTask => solvedTask.taskId === task.id)
+    );
+
+    // (B) Wszystkie nieprzewidziane zadania?
+    const unexpectedTasksForStage = unexpectedTasks.filter(task => task.stage === stage);
+    const unexpectedSolved = unexpectedTasksForStage.every(ut =>
+      solvedTasks.some(solvedTask => solvedTask.taskId === ut.id)
+    );
+
+    return baseTasksSolved && unexpectedSolved;
+  };
+
+  /**
+   * Funkcja sprawdzająca, czy WSZYSTKIE bazowe zadania w etapie są ukończone.
+   * (czyli warunek potrzebny do dołożenia zadań nieprzewidzianych)
+   */
+  const baseTasksSolvedForStage = (stage) => {
+    return tasks[stage]?.every(task =>
+      solvedTasks.some(solvedTask => solvedTask.taskId === task.id)
+    );
+  };
+
+  // 2. Obsługa ETAPÓW – osobno dołożenie zadań nieprzewidzianych i osobno problemów
   useEffect(() => {
-    const allTasksSolvedForStage = (stage) =>
-      tasks[stage]?.every(task =>
-        solvedTasks.some(solvedTask => solvedTask.taskId === task.id)
-      );
-
     columns.forEach((stage) => {
       if (!tasks[stage]) return;
-      if (allTasksSolvedForStage(stage)) {
+
+      // 2.1. Dodawanie zadań nieprzewidzianych (jeśli bazowe zadania są zakończone)
+      const baseTasksDone = baseTasksSolvedForStage(stage);
+      if (
+        baseTasksDone &&
+        !stagesWithUnexpectedAdded.includes(stage) // jeszcze nie dodaliśmy do tego etapu
+      ) {
+        // Dodajemy 'nieprzewidziane' z pliku unexpectedTasksData
         const newTasks = unexpectedTasksData.filter(task => task.stage === stage);
         setUnexpectedTasks(prev => {
           const notAddedYet = newTasks.filter(nt => !prev.some(p => p.id === nt.id));
           return [...prev, ...notAddedYet];
         });
+
+        // Oznaczamy, że zadania nieprzewidziane dla tego etapu zostały już dodane
+        setStagesWithUnexpectedAdded(prev => [...prev, stage]);
+      }
+
+      // 2.2. Dodawanie problemów (jeśli WSZYSTKIE — i bazowe, i nieprzewidziane — zadania są zakończone)
+      const allTasksDone = allTasksSolvedForStage(stage);
+      if (
+        allTasksDone &&
+        !stagesWithProblemsAdded.includes(stage) // jeszcze nie dodaliśmy problemów do tego etapu
+      ) {
+        problems.forEach(problem => {
+          if (problem.category === stage) {
+            if (addedProblems[problem.id]) return; // już wcześniej dodany?
+
+            const {
+              requiredDecisionId,
+              alwaysOccurs,
+              if: conditionIf,
+              baseChance,
+              elseChance,
+            } = problem.condition || {};
+
+            // Sprawdź ewentualny requiredDecisionId
+            if (requiredDecisionId) {
+              const decisionWasMade = solvedTasks.some(t => t.decisionId === requiredDecisionId);
+              if (!decisionWasMade) return; 
+            }
+
+            // Rzut kostką
+            let rollThreshold = baseChance || 3; 
+            if (alwaysOccurs) {
+              rollThreshold = 0; 
+            } else if (conditionIf) {
+              const conditionMet = solvedTasks.some(t => t.decisionId === conditionIf);
+              rollThreshold = conditionMet ? baseChance : elseChance || baseChance;
+            }
+
+            const dice = rollDice();
+            if (dice >= rollThreshold) {
+              dispatch(addDynamicProblem({ ...problem, isNew: true }));
+              setProblemQueue(prevQueue => [
+                ...prevQueue,
+                `Pojawił się nowy problem: ${problem.name}`,
+              ]);
+            }
+          }
+        });
+
+        // Oznaczamy, że problemy dla tego etapu zostały już dodane
+        setStagesWithProblemsAdded(prev => [...prev, stage]);
       }
     });
-  }, [solvedTasks]);
+  }, [
+    columns,
+    solvedTasks,
+    unexpectedTasks,
+    addedProblems,
+    stagesWithUnexpectedAdded,
+    stagesWithProblemsAdded,
+    dispatch
+  ]);
 
-  // -----------------------------
   // 3. Sprawdzanie, czy gra się kończy
-  // -----------------------------
   useEffect(() => {
     const allTasksSolved = Object.values(tasks)
       .flat()
-      .every(task =>
-        solvedTasks.some(solvedTask => solvedTask.taskId === task.id)
-      );
+      .every(task => solvedTasks.some(solvedTask => solvedTask.taskId === task.id));
 
     const allDynamicProblemsSolved = dynamicProblems.every(problem =>
       solvedProblems.includes(problem.id)
@@ -105,66 +204,17 @@ export default function useGameLogic() {
     }
   }, [solvedTasks, solvedProblems, dynamicProblems, customerDissatisfaction, dispatch]);
 
+  // 4. Obsługa kolejki powiadomień o problemach
   useEffect(() => {
-    // Jeżeli nie wyświetlamy żadnego powiadomienia, a w kolejce jest coś
     if (!showProblemNotification && problemQueue.length > 0) {
-      // Pobieramy pierwszy komunikat
       const nextMessage = problemQueue[0];
-      // Ustawiamy go do wyświetlenia
       setProblemNotificationMessage(nextMessage);
       setShowProblemNotification(true);
-      // Usuwamy go z kolejki
       setProblemQueue((prevQueue) => prevQueue.slice(1));
     }
   }, [problemQueue, showProblemNotification]);
 
-  // -----------------------------
-  // 4. Funkcje pomocnicze
-  // -----------------------------
-  const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
-
-  const maybeAddNewProblem = () => {
-    problems.forEach(problem => {
-      if (addedProblems[problem.id]) return;
-
-      const rollResult = rollDice();
-
-      if (problem.condition.requiredDecisionId) {
-        const requiredDecision = solvedTasks.some(
-          t => t.decisionId === problem.condition.requiredDecisionId
-        );
-        if (!requiredDecision) return;
-      }
-
-      let problemAdded = false;
-      if (problem.condition.alwaysOccurs) {
-        problemAdded = true;
-      } else if (problem.condition.if) {
-        // Problem zależny od konkretnej decyzji
-        const hasConditionMet = solvedTasks.some(t => t.decisionId === problem.condition.if);
-        problemAdded = hasConditionMet
-          ? rollResult >= problem.condition.baseChance
-          : rollResult >= (problem.condition.elseChance || problem.condition.baseChance);
-      } else {
-        // Domyślna szansa
-        problemAdded = rollResult >= problem.condition.baseChance;
-      }
-
-      if (problemAdded) {
-        dispatch(addDynamicProblem({ ...problem, isNew: true }));
-        setProblemQueue((prevQueue) => [
-			...prevQueue,
-			`Pojawił się nowy problem: ${problem.name}`
-		  ]);
-        dispatch(setSelectedTask(null));
-        dispatch(setSelectedProblem(null));
-      }
-    });
-  };
-
-  // -----------------------------
   // 5. Handlery
-  // -----------------------------
   const handleDecision = (decision) => {
     dispatch(applyDecision(decision));
 
@@ -178,7 +228,11 @@ export default function useGameLogic() {
     }
 
     if (selectedTask) {
-      dispatch(addSolvedTask({ taskId: selectedTask.id, decisionId: decision.id, decisionName: decision.name, }));
+      dispatch(addSolvedTask({
+        taskId: selectedTask.id,
+        decisionId: decision.id,
+        decisionName: decision.name,
+      }));
       dispatch(setSelectedTask(null));
     } else if (selectedProblem) {
       dispatch(addSolvedProblem({
@@ -187,12 +241,6 @@ export default function useGameLogic() {
       }));
       dispatch(setSelectedProblem(null));
     }
-
-    if (unexpectedTasks.some(t => t.id === selectedTask?.id)) {
-      setUnexpectedTasks(prev => prev.filter(t => t.id !== selectedTask.id));
-    }
-
-    maybeAddNewProblem();
   };
 
   const handleSelectProblem = (problem) => {
@@ -212,16 +260,16 @@ export default function useGameLogic() {
 
   const handleRestart = () => {
     dispatch(restartGame());
+    // Przy restarcie możesz też wyczyścić local state
+    setUnexpectedTasks([]);
+    setProblemQueue([]);
+    setStagesWithUnexpectedAdded([]);
+    setStagesWithProblemsAdded([]);
   };
 
-  // -----------------------------
   // 6. Zwrot danych i funkcji z hooka
-  // -----------------------------
   return {
-    // columns trzymamy i zwracamy w hooku
     columns,
-
-    // Dane ze store + lokalny stan
     budget,
     time,
     solvedTasks,
@@ -236,7 +284,6 @@ export default function useGameLogic() {
     dialogOpen,
     dialogMessage,
 
-    // Funkcje
     handleDecision,
     handleSelectProblem,
     handleCloseProblemNotification,
