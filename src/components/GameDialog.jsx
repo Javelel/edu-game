@@ -15,7 +15,7 @@ const GameDialog = ({ open, message, onRestart }) => (
       Wynik Gry
     </DialogTitle>
     <DialogContent style={{ textAlign: 'center' }}>
-      <Typography variant="body1" style={{ minHeight: '200px', minWidth: '350px', margin: '20px 0', color: '#555' }}>
+      <Typography variant="body1" style={{ minHeight: '200px', minWidth: '350px', margin: '20px 0', color: '#555', whiteSpace: 'pre-line' }}>
         {message}
       </Typography>
     </DialogContent>

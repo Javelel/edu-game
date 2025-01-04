@@ -63,8 +63,7 @@ export default function useGameLogic() {
 						p.category === 'Implementacja' &&
 						!solvedProblems.some((sp) => sp.problemId === p.id)
 				);
-				if (unsolvedImplementation.length > 0) {
-					// Ustawiamy powiadomienie blokujące
+				if (unsolvedImplementation.length > 0 && !showProblemNotification) {
 					setBlockingNotificationMessage(
 						'Musisz najpierw rozwiązać problemy z etapu Implementacja (np. „Słabo zdefiniowany zakres”, „Niedziałające elementy frameworku”), zanim przejdziesz do Wdrożenia.'
 					);
@@ -220,15 +219,15 @@ useEffect(() => {
 			.flat()
 			.every(task => solvedTasks.some(solvedTask => solvedTask.taskId === task.id));
 
-		const allDynamicProblemsSolved = dynamicProblems.every(problem =>
-			solvedProblems.includes(problem.id)
-		);
+			const allDynamicProblemsSolved = dynamicProblems.every(problem =>
+				solvedProblems.some(solvedProblem => solvedProblem.problemId === problem.id)
+			  );
 
 		if (allTasksSolved && allDynamicProblemsSolved) {
-			const message =
-				customerDissatisfaction === 0
-					? 'Brawo! Projekt się udał, a klient jest zadowolony.'
-					: `Projekt ukończony, ale klient jest niezadowolony: ${customerDissatisfaction} punktów.`;
+			const message = `Projekt ukończony, 
+				\nniezadowolenie klienta: ${customerDissatisfaction}
+				\nbudżet: ${budget}
+				\nczas: ${time}`;
 			dispatch(setDialog({ open: true, message }));
 		}
 	}, [solvedTasks, solvedProblems, dynamicProblems, customerDissatisfaction, dispatch]);
@@ -243,46 +242,18 @@ useEffect(() => {
 		}
 	}, [problemQueue, showProblemNotification]);
 
-	// 1. Pomocnicza funkcja isWdrozenieBlocked (jeśli nie masz jej w kodzie):
-const isWdrozenieBlocked = () => {
-	const testyDone = allTasksSolvedForStage('Testy');
-	// Szukamy nierozwiązanych problemów z Implementacji
-	const unsolvedImplementation = dynamicProblems.filter(
-	  (p) => p.category === 'Implementacja' &&
-		!solvedProblems.some((sp) => sp.problemId === p.id)
-	);
-  
-	return testyDone && unsolvedImplementation.length > 0;
-  };
-  
-  // 2. useEffect weryfikujący blokadę wdrożenia zawsze, gdy
-  // dynamicProblems lub solvedProblems się zmienią:
-  useEffect(() => {
-	// Czy wdrożenie wciąż jest zablokowane?
-	if (isWdrozenieBlocked()) {
-	  setBlockingNotificationMessage(
-		'Musisz rozwiązać wszystkie problemy z etapu Implementacja, zanim przejdziesz do Wdrożenia.'
-	  );
-	  setShowBlockingNotification(true);
-	} else {
-	  // Jeśli warunki blokady już nie obowiązują, chowamy komunikat
-	  setShowBlockingNotification(false);
-	  setBlockingNotificationMessage('');
-	}
-  }, [dynamicProblems, solvedProblems]);
-
 	// 5. Handlery
 	const handleDecision = (decision) => {
 		dispatch(applyDecision(decision));
 
-		if (budget - decision.budgetCost < 0) {
-			dispatch(setDialog({ open: true, message: 'Gra zakończona: wyczerpałeś budżet.' }));
-			return;
-		}
-		if (time - decision.timeCost < 0) {
-			dispatch(setDialog({ open: true, message: 'Gra zakończona: zabrakło czasu.' }));
-			return;
-		}
+		// if (budget - decision.budgetCost < 0) {
+		// 	dispatch(setDialog({ open: true, message: 'Gra zakończona: wyczerpałeś budżet.' }));
+		// 	return;
+		// }
+		// if (time - decision.timeCost < 0) {
+		// 	dispatch(setDialog({ open: true, message: 'Gra zakończona: zabrakło czasu.' }));
+		// 	return;
+		// }
 
 		if (selectedTask) {
 			dispatch(addSolvedTask({

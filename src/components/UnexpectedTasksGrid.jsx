@@ -15,6 +15,7 @@ const UnexpectedTasksGrid = ({
         padding: '20px',
         borderRadius: '10px',
         marginTop: '-10px', // Połączenie wizualne z TaskStagesGrid
+		marginBottom: '300px', // miejsce na okno z decyzjami
       }}
     >
       <Grid container spacing={2}>
