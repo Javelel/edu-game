@@ -33,8 +33,10 @@ export const problems = [
 	  description: 'Framework może być niekompatybilny z systemem.',
 	  category: 'Implementacja',
 	  condition: {
-		baseChance: 3,
-		requiredDecisionId: 'D-PZ3-6-2',
+		baseChance: 7,
+		modifiers: [
+			{ source: 'D-PZ3-6-2', adjustment: -4 },
+		],
 	  },
 	  decision1: {
 		id: 'RWZ3-15A',
@@ -59,8 +61,8 @@ export const problems = [
 	  condition: {
 		baseChance: 6,
 		modifiers: [
-		  { source: 'Stażysta', adjustment: -1 },
-		  { source: 'Niedoświadczeni pracownicy', adjustment: -2 },
+		  { source: 'D-PZ2-3-1', adjustment: -1 },
+		  { source: 'RNZ1-11A', adjustment: -2 },
 		],
 	  },
 	  decision1: {
@@ -85,9 +87,10 @@ export const problems = [
 	  description: 'Interfejs użytkownika jest trudny do zrozumienia.',
 	  category: 'Testy',
 	  condition: {
-		if: 'D-PZ2-4-1',
-		baseChance: 2,
-		elseChance: 5,
+		baseChance: 5,
+		modifiers: [
+			{ source: 'D-PZ2-4-1', adjustment: -3 },
+		],
 	  },
 	  decision1: {
 		id: 'RWZ4-17A',
@@ -110,7 +113,10 @@ export const problems = [
 	  description: 'Zrobiliśmy sobie DDOS w trakcie zapisów.',
 	  category: 'Wdrożenie',
 	  condition: {
-		requiredDecisionId: 'D-PZ3-5-1',
+		baseChance: 7,
+		modifiers: [
+			{ source: 'D-PZ3-5-1', adjustment: -7 },
+		],
 	  },
 	  decision1: {
 		id: 'RWZ5-18A',
@@ -131,9 +137,10 @@ export const problems = [
 	  description: 'Dane studentów są niespójne w różnych częściach systemu.',
 	  category: 'Wdrożenie',
 	  condition: {
-		requiredDecisionId: 'D-PZ4-7-1',
-		baseChance: 0,
-		elseChance: 6,
+		baseChance: 6,
+		modifiers: [
+			{ source: 'D-PZ4-7-1', adjustment: -4 },
+		],
 	  },
 	  decision1: {
 		id: 'RWZ5-19A',
@@ -149,8 +156,10 @@ export const problems = [
 	  description: 'System nie obsługuje skrajnych scenariuszy.',
 	  category: 'Wdrożenie',
 	  condition: {
-		requiredDecisionId: 'D-PZ4-8-1',
-		alwaysOccurs: true,
+		baseChance: 7,
+		modifiers: [
+			{ source: 'D-PZ4-8-1', adjustment: -7 },
+		],
 	  },
 	  decision1: {
 		id: 'RWZ5-20A',
