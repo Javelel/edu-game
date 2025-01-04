@@ -27,18 +27,21 @@ const TaskStagesGrid = ({
             >
               {categoryName}
             </Typography>
-            {categoryTasks.map((task) => (
+            {categoryTasks.map((task) => {
+				const solvedTask = solvedTasks.find((st) => st.taskId === task.id);
+			return (
               <TaskCard
                 key={task.id}
                 task={task}
                 isSolved={solvedTasks.some(
                   (solvedTask) => solvedTask.taskId === task.id
                 )}
+				solvedDecision={solvedTask?.decisionName}
 				isSelected={selectedTask?.id === task.id}
                 isClickable={false}
                 onClick={() => {}}
               />
-            ))}
+            )})}
           </Grid>
         ))}
       </Grid>

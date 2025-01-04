@@ -21,18 +21,23 @@ const UnexpectedTasksGrid = ({
         {columns.map((stage, colIndex) => (
           <Grid item xs={12 / columns.length} key={stage}>
             {unexpectedTasks
-              .filter((task) => task.stage === stage)
-              .map((task) => (
+              .filter((task) => task.solveStage === stage)
+              .map((task) => {
+				const solvedTask = solvedTasks.find(
+					(solvedTask) => solvedTask.taskId === task.id
+				  );
+				return (
                 <TaskCard
                   key={task.id}
                   task={task}
                   isSolved={solvedTasks.some(
                     (solvedTask) => solvedTask.taskId === task.id
                   )}
+				  solvedDecision={solvedTask?.decisionName}
 				  isSelected={selectedTask?.id === task.id}
                   isClickable={false}
                 />
-              ))}
+              )})}
           </Grid>
         ))}
       </Grid>

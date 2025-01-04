@@ -26,16 +26,21 @@ const ProblemsList = ({ dynamicProblems, solvedProblems, onSelectProblem, select
         alignItems="center"
         style={{ gap: "10px" }}
       >
-        {dynamicProblems.map((problem) => (
+        {dynamicProblems.map((problem) => {
+			const solvedProblem = solvedProblems.find(
+				(sp) => sp.problemId === problem.id
+			  );
+		return (
           <ProblemCard
             key={problem.id}
             problem={problem}
-            isSolved={solvedProblems.includes(problem.id)}
+            isSolved={!!solvedProblems.find((sp) => sp.problemId === problem.id)}
+			solvedDecision={solvedProblem?.decisionName}
             isClickable={!solvedProblems.includes(problem.id)}
             isSelected={selectedProblem?.id === problem.id}
             onClick={() => onSelectProblem(problem)}
           />
-        ))}
+        )})}
       </Box>
     </Box>
   );

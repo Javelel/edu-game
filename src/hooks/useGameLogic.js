@@ -178,10 +178,13 @@ export default function useGameLogic() {
     }
 
     if (selectedTask) {
-      dispatch(addSolvedTask({ taskId: selectedTask.id, decisionId: decision.id }));
+      dispatch(addSolvedTask({ taskId: selectedTask.id, decisionId: decision.id, decisionName: decision.name, }));
       dispatch(setSelectedTask(null));
     } else if (selectedProblem) {
-      dispatch(addSolvedProblem(selectedProblem.id));
+      dispatch(addSolvedProblem({
+        problemId: selectedProblem.id,
+        decisionName: decision.name,
+      }));
       dispatch(setSelectedProblem(null));
     }
 

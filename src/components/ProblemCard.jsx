@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 
-const ProblemCard = ({ problem, isSolved, isClickable, onClick, isSelected }) => {
+const ProblemCard = ({ problem, isSolved, isClickable, onClick, isSelected, solvedDecision }) => {
 	const borderColor = isSelected
     ? "4px solid blue"
     : isSolved
@@ -51,6 +51,20 @@ const ProblemCard = ({ problem, isSolved, isClickable, onClick, isSelected }) =>
         >
           {problem.description}
         </Typography>
+		{isSolved && solvedDecision && (
+          <Box mt={1}>
+            <Typography
+              variant="body2"
+              style={{
+                fontSize: "12px",
+                color: "#00796b",
+                fontStyle: "italic",
+              }}
+            >
+              Rozwiązanie: {solvedDecision}
+            </Typography>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

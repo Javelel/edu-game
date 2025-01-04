@@ -4,6 +4,7 @@ export const unexpectedTasks = [
 	  name: 'Uwzględnienie ograniczeń prawnych',
 	  description: 'Kwestie RODO i inne regulacje wymagają aktualizacji analizy.',
 	  stage: 'Analiza', // Etap, w którym pojawia się zadanie
+	  solveStage: 'Design', // Etap, w którym zadanie zostaje rozwiązane
 	  cost: null,
 	  duration: null,
 	  decision1: {
@@ -24,6 +25,7 @@ export const unexpectedTasks = [
 	  name: 'Rekrutacja zespołu deweloperskiego',
 	  description: 'Zespół potrzebuje wzmocnienia, aby nadążyć z realizacją projektu.',
 	  stage: 'Analiza',
+	  solveStage: 'Implementacja',
 	  cost: null,
 	  duration: null,
 	  decision1: {
@@ -45,6 +47,7 @@ export const unexpectedTasks = [
 	  name: 'Dodanie obsługi płatności',
 	  description: 'Nowa funkcjonalność wymaga obsługi transakcji.',
 	  stage: 'Design',
+	  solveStage: 'Implementacja',
 	  cost: null,
 	  duration: null,
 	  decision1: {
@@ -68,6 +71,7 @@ export const unexpectedTasks = [
 	  name: 'Prezentacja systemu rektorowi',
 	  description: 'System musi zrobić wrażenie na rektorze.',
 	  stage: 'Implementacja',
+	  solveStage: 'Testy',
 	  cost: null,
 	  duration: null,
 	  decision1: {

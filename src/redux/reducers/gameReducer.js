@@ -45,10 +45,11 @@ const gameSlice = createSlice({
     setBudget: (state, action) => { state.budget = action.payload },
     setTime: (state, action) => { state.time = action.payload },
     addSolvedTask: (state, action) => { 
-		const { taskId, decisionId } = action.payload;
-  		state.solvedTasks.push({ taskId, decisionId });
+		const { taskId, decisionId, decisionName } = action.payload;
+  		state.solvedTasks.push({ taskId, decisionId, decisionName });
 	 },
-    addSolvedProblem: (state, action) => { state.solvedProblems.push(action.payload) },
+    addSolvedProblem: (state, action) => { const { problemId, decisionName } = action.payload;
+	state.solvedProblems.push({ problemId, decisionName }); },
     setSelectedTask: (state, action) => { state.selectedTask = action.payload },
     setSelectedProblem: (state, action) => { state.selectedProblem = action.payload },
     addDynamicProblem: (state, action) => {
