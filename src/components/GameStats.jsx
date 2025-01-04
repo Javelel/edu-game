@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Grid } from '@mui/material';
+import { Box, Typography, Grid, Tooltip } from '@mui/material';
 import { AttachMoney, AccessTime, SentimentDissatisfied } from '@mui/icons-material';
 
 const GameStats = ({
@@ -19,30 +19,30 @@ const GameStats = ({
         {/* Budżet */}
         <Grid item xs={4} style={{ textAlign: 'center' }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <AttachMoney fontSize="large" />
-            <Typography variant="body1">
-              <strong>Budżet:</strong> {budget}
-            </Typography>
+            <Tooltip title={<Typography variant="body2">Budżet</Typography>}>
+              <AttachMoney fontSize="large" />
+            </Tooltip>
+            <Typography variant="body1">{budget} 000 PLN</Typography>
           </Box>
         </Grid>
 
         {/* Czas */}
         <Grid item xs={4} style={{ textAlign: 'center' }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <AccessTime fontSize="large" />
-            <Typography variant="body1">
-              <strong>Czas:</strong> {time}
-            </Typography>
+            <Tooltip title={<Typography variant="body2">Czas</Typography>}>
+              <AccessTime fontSize="large" />
+            </Tooltip>
+            <Typography variant="body1">{time} tygodni</Typography>
           </Box>
         </Grid>
 
         {/* Niezadowolenie klienta */}
         <Grid item xs={4} style={{ textAlign: 'center' }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <SentimentDissatisfied fontSize="large" />
-            <Typography variant="body1">
-              <strong>Niezadowolenie:</strong> {customerDissatisfaction}
-            </Typography>
+            <Tooltip title={<Typography variant="body2">Niezadowolenie klienta</Typography>}>
+              <SentimentDissatisfied fontSize="large" />
+            </Tooltip>
+            <Typography variant="body1">{customerDissatisfaction}</Typography>
           </Box>
         </Grid>
       </Grid>

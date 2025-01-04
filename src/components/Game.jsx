@@ -41,11 +41,13 @@ const Game = () => {
   return (
     <Box p={3} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Sekcja statystyk */}
-      <GameStats
-        budget={budget}
-        time={time}
-        customerDissatisfaction={customerDissatisfaction}
-      />
+  <Box style={{ position: 'sticky', top: 0, zIndex: 0, backgroundColor: 'primary.main' }}>
+    <GameStats
+      budget={budget}
+      time={time}
+      customerDissatisfaction={customerDissatisfaction}
+    />
+  </Box>
 
       {/* Układ dwóch kolumn */}
       <Box display="flex" flexGrow={1} mt={2} mb={6} style={{ overflowY: 'auto' }}>
