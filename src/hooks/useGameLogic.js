@@ -224,6 +224,7 @@ useEffect(() => {
 			  );
 
 		if (allTasksSolved && allDynamicProblemsSolved) {
+			console.log(solvedProblems);
 			const message = `Projekt ukończony, 
 				\nniezadowolenie klienta: ${customerDissatisfaction}
 				\nbudżet: ${budget}
@@ -245,15 +246,6 @@ useEffect(() => {
 	// 5. Handlery
 	const handleDecision = (decision) => {
 		dispatch(applyDecision(decision));
-
-		// if (budget - decision.budgetCost < 0) {
-		// 	dispatch(setDialog({ open: true, message: 'Gra zakończona: wyczerpałeś budżet.' }));
-		// 	return;
-		// }
-		// if (time - decision.timeCost < 0) {
-		// 	dispatch(setDialog({ open: true, message: 'Gra zakończona: zabrakło czasu.' }));
-		// 	return;
-		// }
 
 		if (selectedTask) {
 			dispatch(addSolvedTask({
