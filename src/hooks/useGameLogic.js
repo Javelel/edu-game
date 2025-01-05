@@ -49,6 +49,7 @@ export default function useGameLogic() {
 	const [taskQueue, setTaskQueue] = useState([]);
 	const [showTaskNotification, setShowTaskNotification] = useState(false);
 	const [taskNotificationMessage, setTaskNotificationMessage] = useState('');
+	const [showResolveProblemsNotification, setShowResolveProblemsNotification] = useState(false);
 
 	// Helper: rzut kostką
 	const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
@@ -68,7 +69,7 @@ export default function useGameLogic() {
 				);
 				if (unsolvedImplementation.length > 0 && !showProblemNotification) {
 					setBlockingNotificationMessage(
-						'Aby przejdziesz do Wdrożenia nie możesz mieć nierozwiązanych problemów: „Słabo zdefiniowany zakres” lub „Niedziałające elementy frameworku”)'
+						'Aby przejdziesz do Wdrożenia nie możesz mieć nierozwiązanych problemów: „Słabo zdefiniowany zakres” lub „Niedziałające elementy frameworku”'
 					);
 					setShowBlockingNotification(true);
 					// Przerywamy dalsze pobieranie kolejnego zadania
@@ -247,6 +248,34 @@ useEffect(() => {
 	dispatch,
   ]);
   
+
+  useEffect(() => {
+	// (1) Sprawdzamy, czy WSZYSTKIE zadania (bazowe + nieprzewidziane) są solved
+	const allTasksSolved = Object.values(tasks)
+	  .flat()
+	  .every((task) =>
+		solvedTasks.some((solvedTask) => solvedTask.taskId === task.id)
+	  );
+  
+	const allUnexpectedTasksSolved = unexpectedTasks.every((uTask) =>
+	  solvedTasks.some((solvedTask) => solvedTask.taskId === uTask.id)
+	);
+  
+	const allTasksReallySolved = allTasksSolved && allUnexpectedTasksSolved;
+  
+	// (2) Sprawdzamy, czy istnieją problem(y), które NIE są rozwiązane
+	const anyProblemsUnsolved = dynamicProblems.some(
+	  (problem) => !solvedProblems.some((sp) => sp.problemId === problem.id)
+	);
+  
+	// (3) Jeśli wszystkie zadania zrobione, a problemy jeszcze są – pokazujemy powiadomienie
+	if (allTasksReallySolved && anyProblemsUnsolved && !selectedProblem) {
+	  setShowResolveProblemsNotification(true);
+	} else {
+	  // Gdy warunek nie jest spełniony, chowamy powiadomienie
+	  setShowResolveProblemsNotification(false);
+	}
+  }, [solvedTasks, solvedProblems, dynamicProblems, unexpectedTasks, selectedTask, selectedProblem]);
   
 
 	// 3. Sprawdzanie, czy gra się kończy
@@ -361,6 +390,9 @@ useEffect(() => {
 		customerDissatisfaction,
 		dialogOpen,
 		dialogMessage,
+
+		showResolveProblemsNotification,
+  		setShowResolveProblemsNotification,
 
 		showTaskNotification,
   		taskNotificationMessage,

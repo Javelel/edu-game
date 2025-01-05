@@ -9,6 +9,7 @@ import GameDialog from "./GameDialog";
 import ProblemNotification from "./ProblemNotification";
 import BlockingNotification from "./BlockingNotification";
 import TaskNotification from "./TaskNotification";
+import ResolveProblemsNotification from "./ResolveProblemsNotification";
 
 import useGameLogic from "../hooks/useGameLogic";
 import { tasks } from "../data/tasks"; // żeby przekazać do TaskStagesGrid
@@ -33,6 +34,8 @@ const Game = () => {
     customerDissatisfaction,
     dialogOpen,
     dialogMessage,
+	showResolveProblemsNotification,
+  	setShowResolveProblemsNotification,
 	
     // funkcje
     handleDecision,
@@ -90,13 +93,18 @@ const Game = () => {
       />
 
       {/* Sekcja powiadomień i decyzji */}
-	  {(showBlockingNotification || showProblemNotification || selectedTask || selectedProblem) && (
+	  {(showBlockingNotification ||
+  		showProblemNotification ||
+  		showTaskNotification ||     // <--- też bym tu dodał,
+  		selectedTask ||
+  		selectedProblem ||
+  		showResolveProblemsNotification) && (
         <Box
           style={{
             position: 'fixed',
             bottom: 0,
-            left: 0,
-            width: '100%',
+            left: '25%',
+            width: '50%',
             backgroundColor: 'rgba(0, 0, 0, 0)',
             zIndex: 1000,
             padding: '10px',
@@ -114,7 +122,11 @@ const Game = () => {
               message={taskNotificationMessage}
               onClose={handleCloseTaskNotification}
             />
-          ) : (
+          ) : showResolveProblemsNotification ? (
+			<ResolveProblemsNotification
+			  onClose={() => setShowResolveProblemsNotification(false)}
+			/>
+		  ) : (
             <DecisionBox
               selectedItem={selectedTask || selectedProblem}
               handleDecision={handleDecision}
