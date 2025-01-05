@@ -23,10 +23,9 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
       variant="elevation"
       elevation={3}
       style={{
-        maxWidth: '600px',
-        margin: '20px auto',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
+        maxWidth: '1000px',
+        margin: '0px auto',
+        backgroundColor: '#C0E0FF',
         borderRadius: '10px',
       }}
     >
@@ -46,24 +45,32 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
           variant="body1"
           style={{ marginBottom: '20px', textAlign: 'center', color: '#555' }}
         >
-          {selectedItem.description}
+          {selectedItem.descriptionLong}
         </Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Button
             variant="contained"
-            color="primary"
             onClick={() => handleDecision(selectedItem.decision1)}
             style={{
               textAlign: 'left',
               justifyContent: 'space-between',
-              padding: '15px',
+              padding: '10px 15px',
               fontWeight: 'bold',
+              fontSize: '14px',
               textTransform: 'none',
+			  background: 'linear-gradient(90deg, #6a11cb, #2575fc)'
             }}
           >
-            {selectedItem.decision1.name}
-            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1} style={{ marginLeft: '10px' }}>
+            <Box display="flex" flexDirection="column" alignItems="flex-start" style={{ width: '100%' }}>
+              <Typography variant="body1" style={{ color: '#fff', fontWeight: 'bold' }}>
+                {selectedItem.decision1.name}
+              </Typography>
+              <Typography variant="body2" style={{ color: '#fff' }}>
+                {selectedItem.decision1.description}
+              </Typography>
+            </Box>
+            <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1} style={{ minWidth: '180px' }}>
               {parseRange(selectedItem.decision1.budgetCost) && (
                 <Box display="flex" alignItems="center" gap={1}>
                   <AttachMoney fontSize="small" />
@@ -72,7 +79,6 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
                   </Typography>
                 </Box>
               )}
-
               {parseTimeRange(selectedItem.decision1.timeCost) && (
                 <Box display="flex" alignItems="center" gap={1}>
                   <AccessTime fontSize="small" />
@@ -81,7 +87,6 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
                   </Typography>
                 </Box>
               )}
-
               {selectedItem.decision1.customerDissatisfaction !== undefined && (
                 <Box display="flex" alignItems="center" gap={1}>
                   <SentimentDissatisfied fontSize="small" />
@@ -96,18 +101,26 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
           {selectedItem.decision2 && (
             <Button
               variant="contained"
-              color="secondary"
               onClick={() => handleDecision(selectedItem.decision2)}
               style={{
                 textAlign: 'left',
                 justifyContent: 'space-between',
-                padding: '15px',
+                padding: '10px 15px',
                 fontWeight: 'bold',
+                fontSize: '14px',
                 textTransform: 'none',
+				background: 'linear-gradient(90deg,rgb(178, 95, 255),rgb(243, 123, 254))',
               }}
             >
-              {selectedItem.decision2.name}
-              <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1} style={{ marginLeft: '10px' }}>
+              <Box display="flex" flexDirection="column" alignItems="flex-start" style={{ width: '100%' }}>
+                <Typography variant="body1" style={{ color: '#fff', fontWeight: 'bold' }}>
+                  {selectedItem.decision2.name}
+                </Typography>
+                <Typography variant="body2" style={{ color: '#fff' }}>
+                  {selectedItem.decision2.description}
+                </Typography>
+              </Box>
+              <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1} style={{ minWidth: '180px' }}>
                 {parseRange(selectedItem.decision2.budgetCost) && (
                   <Box display="flex" alignItems="center" gap={1}>
                     <AttachMoney fontSize="small" />
@@ -116,7 +129,6 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
                     </Typography>
                   </Box>
                 )}
-
                 {parseTimeRange(selectedItem.decision2.timeCost) && (
                   <Box display="flex" alignItems="center" gap={1}>
                     <AccessTime fontSize="small" />
@@ -125,7 +137,6 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
                     </Typography>
                   </Box>
                 )}
-
                 {selectedItem.decision2.customerDissatisfaction !== undefined && (
                   <Box display="flex" alignItems="center" gap={1}>
                     <SentimentDissatisfied fontSize="small" />

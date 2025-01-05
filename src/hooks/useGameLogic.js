@@ -49,6 +49,7 @@ export default function useGameLogic() {
 	const [showTaskNotification, setShowTaskNotification] = useState(false);
 	const [taskNotificationMessage, setTaskNotificationMessage] = useState('');
 	const [showResolveProblemsNotification, setShowResolveProblemsNotification] = useState(false);
+	const [newProblemJustAdded, setNewProblemJustAdded] = useState(false);
 
 	// Helper: rzut kostką
 	const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
@@ -195,59 +196,6 @@ useEffect(() => {
 	setShowTaskNotification(false);
   };
   
-  
-  
-  // (B) useEffect do DODAWANIA PROBLEMÓW
-  useEffect(() => {
-	columns.forEach((stage) => {
-	  if (!tasks[stage]) return;
-  
-	  // Czy w tym etapie ukończono wszystkie (bazowe + niespodziewane) zadania?
-	  const allTasksDone = allTasksSolvedForStage(stage);
-  
-	  if (
-		allTasksDone &&
-		!stagesWithProblemsAdded.includes(stage) // jeśli jeszcze nie dodaliśmy problemów
-	  ) {
-		const newProblemsForStage = []; // Tymczasowa lista dla nowych problemów
-  
-		problems.forEach((problem) => {
-		  if (problem.category === stage) {
-			if (shouldProblemAppear(problem, solvedTasks)) {
-			  // Dodajemy problem do store
-			  dispatch(addDynamicProblem({ ...problem, isNew: true }));
-  
-			  // Dodajemy problem do tymczasowej listy
-			  newProblemsForStage.push(problem.name);
-  
-			  // (opcjonalnie) resetujemy ewentualnie wybrane zadanie / problem
-			  dispatch(setSelectedTask(null));
-			  dispatch(setSelectedProblem(null));
-			}
-		  }
-		});
-  
-		// Jeśli są nowe problemy, dodajemy jedno powiadomienie
-		if (newProblemsForStage.length > 0) {
-		  setProblemQueue((prevQueue) => [
-			...prevQueue,
-			`Nowe problemy w etapie "${stage}": ${newProblemsForStage.join(', ')}`,
-		  ]);
-		}
-  
-		// Oznaczamy, że problemy dla tego etapu zostały już dodane
-		setStagesWithProblemsAdded((prev) => [...prev, stage]);
-	  }
-	});
-  }, [
-	columns,
-	solvedTasks,
-	unexpectedTasks,
-	stagesWithProblemsAdded,
-	dispatch,
-  ]);
-  
-
   useEffect(() => {
 	// (1) Sprawdzamy, czy WSZYSTKIE zadania (bazowe + nieprzewidziane) są solved
 	const allTasksSolved = Object.values(tasks)
@@ -276,28 +224,92 @@ useEffect(() => {
 	}
   }, [solvedTasks, solvedProblems, dynamicProblems, unexpectedTasks, selectedTask, selectedProblem]);
   
-
-	// 3. Sprawdzanie, czy gra się kończy
 	useEffect(() => {
+		setNewProblemJustAdded(false); // reset na start cyklu
+  
+  // A. Spróbuj dodać problemy
+  let added = false;
+		columns.forEach((stage) => {
+		  // Pomijamy etapy, dla których nie mamy zadań w obiekcie "tasks"
+		  if (!tasks[stage]) return;
+	  
+		  // Czy w tym etapie ukończono wszystkie (bazowe + niespodziewane) zadania?
+		  const allTasksDone = allTasksSolvedForStage(stage);
+	  
+		  // Jeśli tak i jeszcze nie dodaliśmy problemów dla tego etapu...
+		  if (allTasksDone && !stagesWithProblemsAdded.includes(stage)) {
+			const newProblemsForStage = [];
+	  
+			// Sprawdzamy wszystkie możliwe problemy i decydujemy, czy dodać
+			problems.forEach((problem) => {
+			  if (problem.category === stage) {
+				if (shouldProblemAppear(problem, solvedTasks)) {
+				  // Dodajemy problem do store (Redux)
+				  dispatch(addDynamicProblem({ ...problem, isNew: true }));
+				  added = true;
+				  newProblemsForStage.push(problem.name);
+	  
+				  // Zerujemy aktualnie wybrane zadanie/problem w UI,
+				  // żeby gracz od razu zobaczył, że pojawiły się nowe problemy
+				  dispatch(setSelectedTask(null));
+				  dispatch(setSelectedProblem(null));
+				}
+			  }
+			});
+	  
+			// Jeśli pojawiły się jakiekolwiek nowe problemy...
+			if (newProblemsForStage.length > 0) {
+			  setProblemQueue((prevQueue) => [
+				...prevQueue,
+				`Nowe problemy w etapie "${stage}": ${newProblemsForStage.join(', ')}`,
+			  ]);
+			}
+	  
+			// Zaznaczamy, że problemy dla tego etapu zostały już dodane
+			setStagesWithProblemsAdded((prev) => [...prev, stage]);
+		  }
+		});
+		if (added) {
+			setNewProblemJustAdded(true);
+			return; // PRZERWIJ - kolejny render, kolejny useEffect
+		  }
+	  
+		// 2. SPRAWDZANIE, CZY GRA SIĘ KOŃCZY (po ewentualnym dodaniu problemów)
 		const allTasksSolved = Object.values(tasks)
-			.flat()
-			.every(task => solvedTasks.some(solvedTask => solvedTask.taskId === task.id));
-
-			const allDynamicProblemsSolved = dynamicProblems.every(problem =>
-				solvedProblems.some(solvedProblem => solvedProblem.problemId === problem.id)
-			  );
-
+		  .flat()
+		  .every((task) =>
+			solvedTasks.some((solvedTask) => solvedTask.taskId === task.id)
+		  );
+	  
+		const allDynamicProblemsSolved = dynamicProblems.every((problem) =>
+		  solvedProblems.some(
+			(solvedProblem) => solvedProblem.problemId === problem.id
+		  )
+		);
+	  
+		// Jeśli naprawdę wszystkie zadania i wszystkie problemy są gotowe...
 		if (allTasksSolved && allDynamicProblemsSolved) {
-			console.log(solvedProblems);
-			const message = `Projekt ukończony, 
-				\nniezadowolenie klienta: ${customerDissatisfaction}
-				\nbudżet: ${budget}
-				\nczas: ${time}`;
-			dispatch(setDialog({ open: true, message }));
+		  const message = {
+			budget: budget,
+			time: time,
+			customerDissatisfaction: customerDissatisfaction,
+		  };
+		  dispatch(setDialog({ open: true, message }));
 		}
-	}, [solvedTasks, solvedProblems, dynamicProblems, customerDissatisfaction, dispatch]);
-
-	// 4. Obsługa kolejki powiadomień o problemach
+	  }, [
+		// zależności
+		columns,
+		solvedTasks,
+		solvedProblems,
+		dynamicProblems,
+		unexpectedTasks,
+		stagesWithProblemsAdded,
+		customerDissatisfaction,
+		time,
+		budget,
+		dispatch,
+	  ]);
+	  
 	useEffect(() => {
 		if (!showProblemNotification && problemQueue.length > 0) {
 			const nextMessage = problemQueue[0];

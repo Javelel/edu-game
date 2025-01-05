@@ -1,4 +1,5 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, Button } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, Button, Box } from '@mui/material';
+import { AttachMoney, AccessTime, SentimentDissatisfied } from '@mui/icons-material';
 
 const GameDialog = ({ open, message, onRestart }) => (
   <Dialog
@@ -36,20 +37,30 @@ const GameDialog = ({ open, message, onRestart }) => (
         color: '#444',
       }}
     >
-      <Typography
-        variant="body1"
-        style={{
-          minHeight: '200px',
-          minWidth: '350px',
-          margin: '20px 0',
-          fontSize: '1.1rem',
-          lineHeight: '1.6',
-          color: '#555',
-          whiteSpace: 'pre-line',
-        }}
-      >
-        {message}
-      </Typography>
+      <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+	  <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+            Projekt sotał zakończony twoje statystyki to:
+        </Typography>
+        {/* Wyświetlanie ikon i danych */}
+        <Box display="flex" alignItems="center" gap={1}>
+          <AttachMoney fontSize="large" style={{ color: '#6a11cb' }} />
+          <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+            Budżet: {message.budget} 000 PLN
+          </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          <AccessTime fontSize="large" style={{ color: '#6a11cb' }} />
+          <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+            Czas: {message.time} tygodni
+          </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" gap={1}>
+          <SentimentDissatisfied fontSize="large" style={{ color: '#6a11cb' }} />
+          <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+            Niezadowolenie klienta: {message.customerDissatisfaction}
+          </Typography>
+        </Box>
+      </Box>
     </DialogContent>
 
     {/* Akcje */}

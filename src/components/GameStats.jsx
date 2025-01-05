@@ -11,9 +11,9 @@ const GameStats = ({
     <Box
       mb={2}
       p={2}
-      bgcolor="primary.main"
       borderRadius={2}
       color="white"
+	  style={{ background: 'linear-gradient(90deg, #6a11cb, #2575fc)',}}
     >
       <Grid container spacing={2} justifyContent="space-between" alignItems="center">
         {/* Budżet */}
