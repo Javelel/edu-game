@@ -2,29 +2,24 @@ import React from "react";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 import { AttachMoney, AccessTime } from '@mui/icons-material';
 
-const TaskCard = ({ task, isSolved, isClickable, onClick, isSelected, solvedDecision }) => {
-	const borderColor = isSelected
+const TaskCard = ({
+  task,
+  isSolved,
+  isClickable,
+  onClick,
+  isSelected,
+  solvedDecision
+}) => {
+  const borderColor = isSelected
     ? "4px solid blue"
     : isSolved
     ? "2px solid green"
     : "1px solid gray";
 
-	const backgroundColor = isSolved ? '#e8f5e9' : '#fff';
+  const backgroundColor = isSolved ? '#e8f5e9' : '#fff';
 
-  const getActualCost = () => {
-    if (!isSolved || !solvedDecision) return null;
-    const decision = [task.decision1, task.decision2].find(d => d.name === solvedDecision);
-    return decision ? decision.budgetCost : null;
-  };
-
-  const getActualDuration = () => {
-    if (!isSolved || !solvedDecision) return null;
-    const decision = [task.decision1, task.decision2].find(d => d.name === solvedDecision);
-    return decision ? decision.timeCost : null;
-  };
-
-  const actualCost = getActualCost();
-  const actualDuration = getActualDuration();
+  const actualCost = task.actualBudgetCost;
+  const actualDuration = task.actualTimeCost;
 
   return (
     <Card
@@ -52,19 +47,28 @@ const TaskCard = ({ task, isSolved, isClickable, onClick, isSelected, solvedDeci
         <Typography variant="body2" style={{ fontSize: '14px', color: '#555' }}>
           {task.description}
         </Typography>
+
         <Box mt={1}>
-          {task.cost != null && task.cost !== '' ? (
+          {/* ------------------------------------------
+              KOSZT
+          ------------------------------------------ */}
+          {task.cost ? (
             <Box display="flex" alignItems="center" gap={1} mt={1}>
               <AttachMoney fontSize="small" style={{ color: '#4caf50' }} />
               <Typography variant="body2" style={{ fontSize: '12px', color: '#333' }}>
                 <strong>Przewidywany koszt:</strong> {task.cost} 000 PLN
-                {actualCost !== null && (
-                  <span style={{ fontSize: '12px', color: '#777' }}> (rzeczywisty: {actualCost} 000 PLN)</span>
+                {/* NEW: pokazuj rzeczywisty koszt tylko, jeśli isSolved = true */}
+                {isSolved && actualCost != null && (
+                  <span style={{ fontSize: '12px', color: '#777' }}>
+                    {' '}(rzeczywisty: {actualCost} 000 PLN)
+                  </span>
                 )}
               </Typography>
             </Box>
           ) : (
-            actualCost !== null && (
+            /* Jeżeli w definicji zadania nie ma cost,
+               a zadanie jest rozwiązane => wyświetlamy tylko rzeczywisty koszt */
+            isSolved && actualCost != null && (
               <Box display="flex" alignItems="center" gap={1} mt={1}>
                 <AttachMoney fontSize="small" style={{ color: '#4caf50' }} />
                 <Typography variant="body2" style={{ fontSize: '14px', color: '#333' }}>
@@ -73,18 +77,27 @@ const TaskCard = ({ task, isSolved, isClickable, onClick, isSelected, solvedDeci
               </Box>
             )
           )}
-          {task.duration != null && task.duration !== '' ? (
+
+          {/* ------------------------------------------
+              CZAS
+          ------------------------------------------ */}
+          {task.duration ? (
             <Box display="flex" alignItems="center" gap={1} mt={1}>
               <AccessTime fontSize="small" style={{ color: '#ff9800' }} />
               <Typography variant="body2" style={{ fontSize: '12px', color: '#333' }}>
                 <strong>Przewidywany czas:</strong> {task.duration} tygodni
-                {actualDuration !== null && (
-                  <span style={{ fontSize: '12px', color: '#777' }}> (rzeczywisty: {actualDuration} tygodni)</span>
+                {/* NEW: pokazuj rzeczywisty czas tylko, jeśli isSolved = true */}
+                {isSolved && actualDuration != null && (
+                  <span style={{ fontSize: '12px', color: '#777' }}>
+                    {' '}(rzeczywisty: {actualDuration} tygodni)
+                  </span>
                 )}
               </Typography>
             </Box>
           ) : (
-            actualDuration !== null && (
+            /* jeżeli w definicji zadania nie ma duration,
+               a zadanie jest rozwiązane => wyświetlamy tylko rzeczywisty czas */
+            isSolved && actualDuration != null && (
               <Box display="flex" alignItems="center" gap={1} mt={1}>
                 <AccessTime fontSize="small" style={{ color: '#ff9800' }} />
                 <Typography variant="body2" style={{ fontSize: '14px', color: '#333' }}>
@@ -93,6 +106,10 @@ const TaskCard = ({ task, isSolved, isClickable, onClick, isSelected, solvedDeci
               </Box>
             )
           )}
+
+          {/* ------------------------------------------
+              DECYZJA
+          ------------------------------------------ */}
           {isSolved && solvedDecision && (
             <Box mt={2}>
               <Typography

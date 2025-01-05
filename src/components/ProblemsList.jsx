@@ -33,7 +33,11 @@ const ProblemsList = ({ dynamicProblems, solvedProblems, onSelectProblem, select
 		return (
           <ProblemCard
             key={problem.id}
-            problem={problem}
+            problem={{
+                ...problem,
+                actualBudgetCost: solvedProblem?.actualBudgetCost,
+                actualTimeCost: solvedProblem?.actualTimeCost,
+              }}
             isSolved={!!solvedProblems.find((sp) => sp.problemId === problem.id)}
 			solvedDecision={solvedProblem?.decisionName}
             isClickable={!solvedProblems.find((sp) => sp.problemId === problem.id)}

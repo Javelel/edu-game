@@ -91,3 +91,21 @@ export function getNextUnsolvedTaskWithUnexpected(
 	  startIndex + 1
 	);
   }
+
+  export function calculateCost(cost) {
+	if (typeof cost === 'number') return cost;
+  
+	const parts = cost.split('+');
+	let total = 0;
+  
+	for (const part of parts) {
+	  if (part.includes('k6')) {
+		const multiplier = parseInt(part.replace('k6', ''), 10) || 1;
+		total += multiplier * Math.floor(Math.random() * 6 + 1);
+	  } else {
+		total += parseInt(part, 10);
+	  }
+	}
+  
+	return total;
+  }

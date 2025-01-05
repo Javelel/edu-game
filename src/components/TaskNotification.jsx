@@ -1,7 +1,7 @@
 import { Card, CardContent, Button, Typography } from '@mui/material';
 
-const ProblemNotification = ({ message, onClose }) => (
-	<Card
+const TaskNotification = ({ message, onClose }) => (
+  <Card
     variant="elevation"
     elevation={3}
     style={{
@@ -9,7 +9,7 @@ const ProblemNotification = ({ message, onClose }) => (
       margin: '20px auto',
       padding: '20px',
       borderRadius: '10px',
-      backgroundColor: '#fffbea',
+      backgroundColor: '#e3f2fd',
     }}
   >
     <CardContent>
@@ -18,10 +18,10 @@ const ProblemNotification = ({ message, onClose }) => (
         style={{
           fontWeight: 'bold',
           textAlign: 'center',
-          color: '#ff9800',
+          color: '#2196f3',
         }}
       >
-        ⚠️ Nowe Problemy
+        📋 Nowe Zadania!
       </Typography>
       <Typography
         variant="body1"
@@ -35,7 +35,7 @@ const ProblemNotification = ({ message, onClose }) => (
       </Typography>
       <Button
         variant="contained"
-        color="secondary"
+        color="primary"
         onClick={onClose}
         style={{
           marginTop: '30px',
@@ -53,4 +53,4 @@ const ProblemNotification = ({ message, onClose }) => (
   </Card>
 );
 
-export default ProblemNotification;
+export default TaskNotification;

@@ -30,7 +30,11 @@ const UnexpectedTasksGrid = ({
 				return (
                 <TaskCard
                   key={task.id}
-                  task={task}
+                  task={{
+					...task,
+					actualBudgetCost: solvedTask?.actualBudgetCost,
+					actualTimeCost: solvedTask?.actualTimeCost,
+				  }}
                   isSolved={solvedTasks.some(
                     (solvedTask) => solvedTask.taskId === task.id
                   )}

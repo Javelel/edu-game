@@ -1,24 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { problems } from '../../data/problems';
+import { calculateCost } from '../../utils/taskHelpers';
 
 // Funkcja pomocnicza: obsługa rzutów kostką
-const calculateCost = (cost) => {
-  if (typeof cost === 'number') return cost;
+// const calculateCost = (cost) => {
+//   if (typeof cost === 'number') return cost;
 
-  const parts = cost.split('+');
-  let total = 0;
+//   const parts = cost.split('+');
+//   let total = 0;
 
-  for (const part of parts) {
-    if (part.includes('k6')) {
-      const multiplier = parseInt(part.replace('k6', ''), 10) || 1;
-      total += multiplier * Math.floor(Math.random() * 6 + 1); // Rzut kostką (1-6)
-    } else {
-      total += parseInt(part, 10);
-    }
-  }
+//   for (const part of parts) {
+//     if (part.includes('k6')) {
+//       const multiplier = parseInt(part.replace('k6', ''), 10) || 1;
+//       total += multiplier * Math.floor(Math.random() * 6 + 1); // Rzut kostką (1-6)
+//     } else {
+//       total += parseInt(part, 10);
+//     }
+//   }
 
-  return total;
-};
+//   return total;
+// };
 
 const initialState = {
   budget: 70,
@@ -45,11 +46,31 @@ const gameSlice = createSlice({
     setBudget: (state, action) => { state.budget = action.payload },
     setTime: (state, action) => { state.time = action.payload },
     addSolvedTask: (state, action) => { 
-		const { taskId, decisionId, decisionName } = action.payload;
-  		state.solvedTasks.push({ taskId, decisionId, decisionName });
-	 },
-    addSolvedProblem: (state, action) => { const { problemId, decisionName } = action.payload;
-	state.solvedProblems.push({ problemId, decisionName }); },
+		const {
+		  taskId,
+		  decisionId,
+		  decisionName,
+		  actualBudgetCost,
+		  actualTimeCost,
+		} = action.payload;
+	  
+		state.solvedTasks.push({
+		  taskId,
+		  decisionId,
+		  decisionName,
+		  actualBudgetCost,
+		  actualTimeCost,
+		});
+	  },
+	  addSolvedProblem: (state, action) => {
+		const { problemId, decisionName, actualBudgetCost, actualTimeCost } = action.payload;
+		state.solvedProblems.push({
+		  problemId,
+		  decisionName,
+		  actualBudgetCost,
+		  actualTimeCost,
+		});
+	  },
     setSelectedTask: (state, action) => { state.selectedTask = action.payload },
     setSelectedProblem: (state, action) => { state.selectedProblem = action.payload },
     addDynamicProblem: (state, action) => {

@@ -16,7 +16,7 @@ import {
 import { tasks } from '../data/tasks';
 import { problems } from '../data/problems';
 import { unexpectedTasks as unexpectedTasksData } from '../data/unexpectedTasks';
-import { getNextUnsolvedTaskWithUnexpected } from '../utils/taskHelpers';
+import { getNextUnsolvedTaskWithUnexpected, calculateCost } from '../utils/taskHelpers';
 
 const columns = ["Analiza", "Design", "Implementacja", "Testy", "Wdrożenie"];
 
@@ -46,6 +46,9 @@ export default function useGameLogic() {
 	const [blockingNotificationMessage, setBlockingNotificationMessage] = useState('');
 	const [stagesWithUnexpectedAdded, setStagesWithUnexpectedAdded] = useState([]);
 	const [stagesWithProblemsAdded, setStagesWithProblemsAdded] = useState([]);
+	const [taskQueue, setTaskQueue] = useState([]);
+	const [showTaskNotification, setShowTaskNotification] = useState(false);
+	const [taskNotificationMessage, setTaskNotificationMessage] = useState('');
 
 	// Helper: rzut kostką
 	const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
@@ -65,7 +68,7 @@ export default function useGameLogic() {
 				);
 				if (unsolvedImplementation.length > 0 && !showProblemNotification) {
 					setBlockingNotificationMessage(
-						'Musisz najpierw rozwiązać problemy z etapu Implementacja (np. „Słabo zdefiniowany zakres”, „Niedziałające elementy frameworku”), zanim przejdziesz do Wdrożenia.'
+						'Aby przejdziesz do Wdrożenia nie możesz mieć nierozwiązanych problemów: „Słabo zdefiniowany zakres” lub „Niedziałające elementy frameworku”)'
 					);
 					setShowBlockingNotification(true);
 					// Przerywamy dalsze pobieranie kolejnego zadania
@@ -158,6 +161,13 @@ useEffect(() => {
 		const newTasks = unexpectedTasksData.filter((task) => task.stage === stage);
 		setUnexpectedTasks((prev) => {
 		  const notAddedYet = newTasks.filter((nt) => !prev.some((p) => p.id === nt.id));
+		  if (notAddedYet.length > 0) {
+			const taskNames = notAddedYet.map(t => t.name).join(', ');
+			setTaskQueue((prevQueue) => [
+			  ...prevQueue,
+			  `Pojawiły się nowe zadania dla etapu ${stage}: ${taskNames}`
+			]);
+		  }
 		  return [...prev, ...notAddedYet];
 		});
 		setStagesWithUnexpectedAdded((prev) => [...prev, stage]);
@@ -168,6 +178,23 @@ useEffect(() => {
 	solvedTasks,
 	stagesWithUnexpectedAdded,
   ]);
+
+  useEffect(() => {
+	// Jeśli nie wyświetlamy aktualnie powiadomienia o zadaniach i mamy coś w kolejce...
+	if (!showTaskNotification && taskQueue.length > 0) {
+	  const nextMessage = taskQueue[0];
+	  setTaskNotificationMessage(nextMessage);
+	  setShowTaskNotification(true);
+	  // usuwamy pierwszy element z kolejki
+	  setTaskQueue((prevQueue) => prevQueue.slice(1));
+	}
+  }, [taskQueue, showTaskNotification]);
+  
+  // 4. Handler do zamykania powiadomienia
+  const handleCloseTaskNotification = () => {
+	setShowTaskNotification(false);
+  };
+  
   
   
   // (B) useEffect do DODAWANIA PROBLEMÓW
@@ -182,23 +209,31 @@ useEffect(() => {
 		allTasksDone &&
 		!stagesWithProblemsAdded.includes(stage) // jeśli jeszcze nie dodaliśmy problemów
 	  ) {
+		const newProblemsForStage = []; // Tymczasowa lista dla nowych problemów
+  
 		problems.forEach((problem) => {
 		  if (problem.category === stage) {
 			if (shouldProblemAppear(problem, solvedTasks)) {
-				// Dodajemy problem do store
-				dispatch(addDynamicProblem({ ...problem, isNew: true }));
-				// Wrzucamy do kolejki powiadomień
-				setProblemQueue((prevQueue) => [
-				  ...prevQueue,
-				  `Pojawił się nowy problem: ${problem.name}`
-				]);
-	
-				// (opcjonalnie) resetujemy ewentualnie wybrane zadanie / problem
-				dispatch(setSelectedTask(null));
-				dispatch(setSelectedProblem(null));
-			  }
+			  // Dodajemy problem do store
+			  dispatch(addDynamicProblem({ ...problem, isNew: true }));
+  
+			  // Dodajemy problem do tymczasowej listy
+			  newProblemsForStage.push(problem.name);
+  
+			  // (opcjonalnie) resetujemy ewentualnie wybrane zadanie / problem
+			  dispatch(setSelectedTask(null));
+			  dispatch(setSelectedProblem(null));
+			}
 		  }
 		});
+  
+		// Jeśli są nowe problemy, dodajemy jedno powiadomienie
+		if (newProblemsForStage.length > 0) {
+		  setProblemQueue((prevQueue) => [
+			...prevQueue,
+			`Nowe problemy w etapie "${stage}": ${newProblemsForStage.join(', ')}`,
+		  ]);
+		}
   
 		// Oznaczamy, że problemy dla tego etapu zostały już dodane
 		setStagesWithProblemsAdded((prev) => [...prev, stage]);
@@ -211,6 +246,7 @@ useEffect(() => {
 	stagesWithProblemsAdded,
 	dispatch,
   ]);
+  
   
 
 	// 3. Sprawdzanie, czy gra się kończy
@@ -245,6 +281,9 @@ useEffect(() => {
 
 	// 5. Handlery
 	const handleDecision = (decision) => {
+		const budgetCost = calculateCost(decision.budgetCost);
+    	const timeCost   = calculateCost(decision.timeCost);
+
 		dispatch(applyDecision(decision));
 
 		if (selectedTask) {
@@ -252,12 +291,16 @@ useEffect(() => {
 				taskId: selectedTask.id,
 				decisionId: decision.id,
 				decisionName: decision.name,
+				actualBudgetCost: budgetCost,
+            	actualTimeCost: timeCost,
 			}));
 			dispatch(setSelectedTask(null));
 		} else if (selectedProblem) {
 			dispatch(addSolvedProblem({
 				problemId: selectedProblem.id,
 				decisionName: decision.name,
+				actualBudgetCost: budgetCost,
+      			actualTimeCost: timeCost,
 			}));
 			dispatch(setSelectedProblem(null));
 		}
@@ -318,6 +361,10 @@ useEffect(() => {
 		customerDissatisfaction,
 		dialogOpen,
 		dialogMessage,
+
+		showTaskNotification,
+  		taskNotificationMessage,
+  		handleCloseTaskNotification,
 
 		handleDecision,
 		handleSelectProblem,

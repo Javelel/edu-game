@@ -8,6 +8,7 @@ import DecisionBox from "./DecisionBox";
 import GameDialog from "./GameDialog";
 import ProblemNotification from "./ProblemNotification";
 import BlockingNotification from "./BlockingNotification";
+import TaskNotification from "./TaskNotification";
 
 import useGameLogic from "../hooks/useGameLogic";
 import { tasks } from "../data/tasks"; // żeby przekazać do TaskStagesGrid
@@ -26,6 +27,8 @@ const Game = () => {
     blockingNotificationMessage,
     showProblemNotification,
     problemNotificationMessage,
+	showTaskNotification,
+    taskNotificationMessage,
     unexpectedTasks,
     customerDissatisfaction,
     dialogOpen,
@@ -35,6 +38,7 @@ const Game = () => {
     handleDecision,
     handleSelectProblem,
     handleCloseProblemNotification,
+	handleCloseTaskNotification,
     handleRestart,
   } = useGameLogic();
 
@@ -104,6 +108,11 @@ const Game = () => {
             <ProblemNotification
               message={problemNotificationMessage}
               onClose={handleCloseProblemNotification}
+            />
+          ) : showTaskNotification ? (
+            <TaskNotification
+              message={taskNotificationMessage}
+              onClose={handleCloseTaskNotification}
             />
           ) : (
             <DecisionBox

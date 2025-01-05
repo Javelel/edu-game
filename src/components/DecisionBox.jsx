@@ -5,7 +5,7 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
   const parseRange = (value) => {
     if (typeof value === 'string' && value.includes('k6')) {
       const multiplier = value.includes('x') ? parseInt(value.split('x')[1], 10) : 1;
-      return `${multiplier} 000 - ${6 * multiplier} 000 PLN`;
+      return `od -${multiplier} 000 do -${6 * multiplier} 000 PLN`;
     }
     return value !== 0 ? `-${value} 000 PLN` : null;
   };
@@ -13,7 +13,7 @@ const DecisionBox = ({ selectedItem, handleDecision }) => {
   const parseTimeRange = (value) => {
     if (typeof value === 'string' && value.includes('k6')) {
       const multiplier = value.includes('x') ? parseInt(value.split('x')[1], 10) : 1;
-      return `${multiplier} - ${6 * multiplier} tygodni`;
+      return `od -${multiplier} do -${6 * multiplier} tygodni`;
     }
     return value !== 0 ? `-${value} tygodni` : null;
   };
