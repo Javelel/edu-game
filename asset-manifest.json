@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.6527bfdd.css",
-    "main.js": "/static/js/main.15974fa1.js",
-    "index.html": "/index.html",
-    "main.6527bfdd.css.map": "/static/css/main.6527bfdd.css.map",
-    "main.15974fa1.js.map": "/static/js/main.15974fa1.js.map"
+    "main.css": "/edu-game/static/css/main.6527bfdd.css",
+    "main.js": "/edu-game/static/js/main.15974fa1.js",
+    "index.html": "/edu-game/index.html",
+    "main.6527bfdd.css.map": "/edu-game/static/css/main.6527bfdd.css.map",
+    "main.15974fa1.js.map": "/edu-game/static/js/main.15974fa1.js.map"
   },
   "entrypoints": [
     "static/css/main.6527bfdd.css",
