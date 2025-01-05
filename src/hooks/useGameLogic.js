@@ -30,7 +30,6 @@ export default function useGameLogic() {
 		selectedTask,
 		selectedProblem,
 		dynamicProblems,
-		problemChances,
 		addedProblems,
 		customerDissatisfaction,
 		dialogOpen,
@@ -310,8 +309,27 @@ useEffect(() => {
 
 	// 5. Handlery
 	const handleDecision = (decision) => {
+		if (decision.id === 'D-PZ2-3-2') {
+			tasks.Implementacja.forEach(task => {
+			  if (task.id === 'PZ3-5') {
+				task.decision2.budgetCost = 18;
+				task.decision2.timeCost = 9;
+			  }
+			});
+		  }
+
 		const budgetCost = calculateCost(decision.budgetCost);
     	const timeCost   = calculateCost(decision.timeCost);
+
+		if (decision.extraBudget) {
+			const { diceRoll, threshold, reward } = decision.extraBudget;
+			let sides = 6;
+			if (diceRoll === 'k12') sides = 12; 
+			const diceResult = rollDice(sides);
+			if (diceResult >= threshold) {
+			  dispatch(setBudget(budget + reward));
+			}
+		  }
 
 		dispatch(applyDecision(decision));
 
