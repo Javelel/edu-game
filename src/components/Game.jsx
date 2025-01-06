@@ -103,8 +103,8 @@ const Game = () => {
           style={{
             position: 'fixed',
             bottom: 0,
-            left: '12.5%',
-            width: '75%',
+            left: '20%',
+            width: '60%',
             backgroundColor: 'rgba(0, 0, 0, 0)',
             zIndex: 1000,
             padding: '10px',

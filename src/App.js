@@ -1,18 +1,18 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter , Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
 
 import { Game } from './components'
 
 const App = () => {
   return (
-	<BrowserRouter>
+	<HashRouter >
 		<Box sx={{ backgroundColor: '#FFF' }}>
 			<Routes>
 				<Route path="/" element={<Game />} />
 			</Routes>
 		</Box>
-	</BrowserRouter>
+	</HashRouter >
   )
 }
 
