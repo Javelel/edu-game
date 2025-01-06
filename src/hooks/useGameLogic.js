@@ -13,7 +13,7 @@ import {
 	applyDecision,
 } from '../redux/reducers/gameReducer';
 
-import { tasks } from '../data/tasks';
+import { tasks as initialTasks } from '../data/tasks';
 import { problems } from '../data/problems';
 import { unexpectedTasks as unexpectedTasksData } from '../data/unexpectedTasks';
 import { getNextUnsolvedTaskWithUnexpected, calculateCost } from '../utils/taskHelpers';
@@ -25,6 +25,8 @@ export default function useGameLogic() {
 	const {
 		budget,
 		time,
+		expectedBudget,
+  		expectedTime,
 		solvedTasks,
 		solvedProblems,
 		selectedTask,
@@ -50,14 +52,20 @@ export default function useGameLogic() {
 	const [taskNotificationMessage, setTaskNotificationMessage] = useState('');
 	const [showResolveProblemsNotification, setShowResolveProblemsNotification] = useState(false);
 	const [newProblemJustAdded, setNewProblemJustAdded] = useState(false);
-	const [budgetTimeHistory, setBudgetTimeHistory] = useState([{ budget, time }]);
+	const [tasks, setTasks] = useState({ ...initialTasks });
+	const [budgetTimeHistory, setBudgetTimeHistory] = useState([
+		{ budget, time, expectedBudget, expectedTime }
+	  ]);
 
 	// Helper: rzut kostką
 	const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
 
 	useEffect(() => {
-		setBudgetTimeHistory(prevHistory => [...prevHistory, { budget, time }]);
-	  }, [budget, time]);
+		setBudgetTimeHistory((prevHistory) => [
+		  ...prevHistory,
+		  { budget, time, expectedBudget, expectedTime }
+		]);
+	  }, [budget, time, expectedBudget, expectedTime]);
 
 	// 1. Obsługa wyboru kolejnego zadania
 	useEffect(() => {
@@ -327,13 +335,20 @@ useEffect(() => {
 	// 5. Handlery
 	const handleDecision = (decision) => {
 		if (decision.id === 'D-PZ2-3-2') {
-			tasks.Implementacja.forEach(task => {
-			  if (task.id === 'PZ3-5') {
-				task.decision2.budgetCost = 18;
-				task.decision2.timeCost = 9;
-			  }
+			tasks.Implementacja = tasks.Implementacja.map(task => {
+				if (task.id === 'PZ3-5') {
+				  return {
+					...task, // Tworzymy kopię istniejącego zadania
+					decision2: {
+					  ...task.decision2, // Tworzymy kopię obiektu decyzji
+					  budgetCost: 18,
+					  timeCost: 9,
+					},
+				  };
+				}
+				return task;
 			});
-		  }
+		}
 
 		const budgetCost = calculateCost(decision.budgetCost);
     	const timeCost   = calculateCost(decision.timeCost);
@@ -399,18 +414,29 @@ useEffect(() => {
 
 	const handleRestart = () => {
 		dispatch(restartGame());
+		setTasks({ ...initialTasks });
 		setUnexpectedTasks([]);
 		setProblemQueue([]);
 		setStagesWithUnexpectedAdded([]);
 		setStagesWithProblemsAdded([]);
 		setShowBlockingNotification(false);
 		setBlockingNotificationMessage('');
+		setBudgetTimeHistory([
+			{
+			  budget: 70,
+			  time: 40,
+			  expectedBudget: 80,
+			  expectedTime: 40,
+			},
+		  ]);
 	};
 
 	return {
 		columns,
 		budget,
 		time,
+		expectedBudget,
+  		expectedTime,
 		solvedTasks,
 		solvedProblems,
 		selectedTask,

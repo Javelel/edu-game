@@ -1,15 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { problems } from '../../data/problems';
 import { calculateCost } from '../../utils/taskHelpers';
+import { tasks as initialTasks } from '../../data/tasks';
 
 const initialState = {
   budget: 70,
-  time: 55,
+  time: 40,
+  expectedBudget: 80,
+  expectedTime: 40,
   solvedTasks: [],
   solvedProblems: [],
   selectedTask: null,
   selectedProblem: null,
   dynamicProblems: [],
+  tasks: { ...initialTasks },
   problemChances: problems.reduce((acc, problem) => {
     acc[problem.id] = problem.baseChance;
     return acc;
@@ -34,6 +38,15 @@ const gameSlice = createSlice({
 		  actualBudgetCost,
 		  actualTimeCost,
 		} = action.payload;
+
+		const allTasks = Object.values(state.tasks).flat(); // Zmienia obiekt `tasks` na jednolitą tablicę
+		const task = allTasks.find((t) => t.id === taskId);
+
+  		// Zmniejsz przewidywany budżet i czas
+  		if (task) {
+    		state.expectedBudget -= task.cost;
+    		state.expectedTime -= task.duration;
+  		}
 	  
 		state.solvedTasks.push({
 		  taskId,
@@ -93,7 +106,13 @@ const gameSlice = createSlice({
       state.dialogOpen = action.payload.open;
       state.dialogMessage = action.payload.message;
     },
-    restartGame: () => initialState,
+    restartGame: () => {
+		// Resetuj cały stan do początkowego, łącznie z zadaniami
+		return {
+		  ...initialState,
+		  tasks: { ...initialTasks }, // Reset tasków
+		};
+	  },
   },
 });
 
@@ -107,7 +126,7 @@ export const {
   addDynamicProblem,
   adjustProblemChance,
   incrementCustomerDissatisfaction,
-  applyDecision, // Dodano nową akcję
+  applyDecision,
   setDialog,
   restartGame,
 } = gameSlice.actions;
