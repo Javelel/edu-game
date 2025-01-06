@@ -10,6 +10,7 @@ import ProblemNotification from "./ProblemNotification";
 import BlockingNotification from "./BlockingNotification";
 import TaskNotification from "./TaskNotification";
 import ResolveProblemsNotification from "./ResolveProblemsNotification";
+import BudgetTimeChart from './BudgetTimeChart';
 
 import useGameLogic from "../hooks/useGameLogic";
 import { tasks } from "../data/tasks"; // żeby przekazać do TaskStagesGrid
@@ -35,6 +36,8 @@ const Game = () => {
     dialogOpen,
     dialogMessage,
 	showResolveProblemsNotification,
+	budgetTimeHistory,
+
   	setShowResolveProblemsNotification,
 	
     // funkcje
@@ -83,6 +86,9 @@ const Game = () => {
             onSelectProblem={handleSelectProblem}
           />
         </Box>
+		<Box mt={3}>
+			<BudgetTimeChart history={budgetTimeHistory} />
+		</Box>
       </Box>
 
       {/* Dialog końcowy / restart gry */}

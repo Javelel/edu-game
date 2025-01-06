@@ -50,9 +50,14 @@ export default function useGameLogic() {
 	const [taskNotificationMessage, setTaskNotificationMessage] = useState('');
 	const [showResolveProblemsNotification, setShowResolveProblemsNotification] = useState(false);
 	const [newProblemJustAdded, setNewProblemJustAdded] = useState(false);
+	const [budgetTimeHistory, setBudgetTimeHistory] = useState([{ budget, time }]);
 
 	// Helper: rzut kostką
 	const rollDice = (sides = 6) => Math.floor(Math.random() * sides + 1);
+
+	useEffect(() => {
+		setBudgetTimeHistory(prevHistory => [...prevHistory, { budget, time }]);
+	  }, [budget, time]);
 
 	// 1. Obsługa wyboru kolejnego zadania
 	useEffect(() => {
@@ -420,6 +425,7 @@ useEffect(() => {
 		customerDissatisfaction,
 		dialogOpen,
 		dialogMessage,
+		budgetTimeHistory,
 
 		showResolveProblemsNotification,
   		setShowResolveProblemsNotification,
