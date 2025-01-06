@@ -30,7 +30,7 @@ const budgetOptions = {
       type: 'category',
       title: {
         display: true,
-        text: 'Tura',
+        text: 'Taski',
       },
     },
     y: {
@@ -52,7 +52,7 @@ const timeOptions = {
       type: 'category',
       title: {
         display: true,
-        text: 'Tura',
+        text: 'Taski',
       },
     },
     y: {
@@ -69,7 +69,7 @@ const timeOptions = {
 // Wykres dla Budżetu
 const BudgetChart = ({ history }) => {
   const data = {
-    labels: history.map((entry, index) => `Tura ${index + 1}`),
+    labels: history.map((entry, index) => `Task ${index + 1}`),
     datasets: [
       {
         label: 'Rzeczywisty budżet',
@@ -98,7 +98,7 @@ const BudgetChart = ({ history }) => {
 // Wykres dla Czasu
 const TimeChart = ({ history }) => {
   const data = {
-    labels: history.map((entry, index) => `Tura ${index + 1}`),
+    labels: history.map((entry, index) => `Task ${index + 1}`),
     datasets: [
       {
         label: 'Rzeczywisty czas',

@@ -423,10 +423,10 @@ useEffect(() => {
 		setBlockingNotificationMessage('');
 		setBudgetTimeHistory([
 			{
-			  budget: 70,
-			  time: 40,
-			  expectedBudget: 80,
-			  expectedTime: 40,
+			  budget: 78,
+			  time: 52,
+			  expectedBudget: 78,
+			  expectedTime: 52,
 			},
 		  ]);
 	};

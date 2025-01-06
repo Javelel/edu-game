@@ -4,10 +4,10 @@ import { calculateCost } from '../../utils/taskHelpers';
 import { tasks as initialTasks } from '../../data/tasks';
 
 const initialState = {
-  budget: 70,
-  time: 40,
-  expectedBudget: 80,
-  expectedTime: 40,
+  budget: 78,
+  time: 52,
+  expectedBudget: 78,
+  expectedTime: 52,
   solvedTasks: [],
   solvedProblems: [],
   selectedTask: null,

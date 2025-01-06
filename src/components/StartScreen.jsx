@@ -49,7 +49,7 @@ const StartScreen = ({ onStart }) => {
         >
           Twoim zadaniem jest zaprojektowanie i zrealizowanie systemu informatycznego
           dla dziekanatu Politechniki Warszawskiej. Projekt został podzielony na pięć
-          etapów, a każdy etap składa się z kilku zadań. Zaplanowałeś koszty i czas
+          etapów, a każdy etap składa się z zadań. Zaplanowałeś koszty i czas
           potrzebny na realizację poszczególnych zadań, jednak to jedynie założenia. <br /><br />
           Twoim celem jest ukończenie wszystkich zadań w ramach ustalonego budżetu i harmonogramu.
           W trakcie realizacji projektu pojawią się nieprzewidziane zadania, a wyniku podjętych decyzji mogą wystąpić problemy,
