@@ -29,7 +29,7 @@ export const unexpectedTasks = [
 	  description: 'Zespół potrzebuje wzmocnienia, aby nadążyć z realizacją projektu.',
 	  descriptionLong: 'Okazuje się, że obecny zespół jest niewystarczający do realizacji projektu. Musisz zdecydować, jak szybko i skutecznie wzmocnić zespół.',
     stage: 'Analiza',
-	  solveStage: 'Implementacja',
+	  solveStage: 'Design',
 	  cost: null,
 	  duration: null,
 	  decision1: {

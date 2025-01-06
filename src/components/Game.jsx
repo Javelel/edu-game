@@ -15,8 +15,13 @@ import ResolveProblemsNotification from "./ResolveProblemsNotification";
 import BudgetTimeChart from './BudgetTimeChart';
 import StartScreen from "./StartScreen";
 
+import { useDispatch } from 'react-redux'; // Import dispatch
+import { setDialog } from '../redux/reducers/gameReducer';
+
 import useGameLogic from "../hooks/useGameLogic";
 import { tasks } from "../data/tasks";
+
+
 
 const Game = () => {
   const [isGameStarted, setIsGameStarted] = useState(false); // Dodany stan
@@ -48,6 +53,14 @@ const Game = () => {
     handleCloseTaskNotification,
     handleRestart,
   } = useGameLogic();
+
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  const dispatch = useDispatch();
+  const handleCloseDialog = () => {
+	dispatch(setDialog({ open: false, message: '' })); // Zamknięcie dialogu poprzez Redux
+	setIsGameOver(true);
+  };
 
   if (!isGameStarted) {
     return <StartScreen onStart={() => setIsGameStarted(true)} />;
@@ -93,7 +106,7 @@ const Game = () => {
       <GameDialog
         open={dialogOpen}
         message={dialogMessage}
-        onRestart={handleRestart}
+        close={handleCloseDialog}
         budgetTimeHistory={budgetTimeHistory}
       />
 
@@ -103,7 +116,7 @@ const Game = () => {
         showTaskNotification ||
         selectedTask ||
         selectedProblem ||
-        showResolveProblemsNotification) && (
+        showResolveProblemsNotification || isGameOver) && (
           <Box
             style={{
               position: 'fixed',
@@ -156,7 +169,7 @@ const Game = () => {
                 <ResolveProblemsNotification
                   onClose={() => setShowResolveProblemsNotification(false)}
                 />
-              ) : (
+              ) : isGameOver ? (<></>) : (
                 <DecisionBox
                   selectedItem={selectedTask || selectedProblem}
                   handleDecision={handleDecision}
