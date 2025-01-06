@@ -1,21 +1,23 @@
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography, Button, Box } from '@mui/material';
 import { AttachMoney, AccessTime, SentimentDissatisfied } from '@mui/icons-material';
+import BudgetTimeChart from './BudgetTimeChart'; // Import wykresu
 
-const GameDialog = ({ open, message, onRestart }) => (
+const GameDialog = ({ open, message, onRestart, budgetTimeHistory }) => (
   <Dialog
     open={open}
-    onClose={() => {}} // Wyłączenie domyślnego zamykania na kliknięcie tła
-    disableEscapeKeyDown // Wyłączenie zamykania okna klawiszem Esc
+    onClose={() => {}}
+    disableEscapeKeyDown
     PaperProps={{
       style: {
         padding: '20px',
         borderRadius: '20px',
         boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.2)',
         background: 'linear-gradient(135deg, #ffffff, #f8f8f8)',
+        maxWidth: '60vw', // Zwiększenie szerokości do 80% szerokości okna
+        width: '60%', // Ustawienie faktycznej szerokości
       },
     }}
   >
-    {/* Nagłówek */}
     <DialogTitle
       style={{
         textAlign: 'center',
@@ -29,7 +31,6 @@ const GameDialog = ({ open, message, onRestart }) => (
       Wynik Gry
     </DialogTitle>
 
-    {/* Treść */}
     <DialogContent
       style={{
         textAlign: 'center',
@@ -38,10 +39,9 @@ const GameDialog = ({ open, message, onRestart }) => (
       }}
     >
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-	  <Typography variant="body1" style={{ fontWeight: 'bold' }}>
-            Projekt sotał zakończony twoje statystyki to:
+        <Typography variant="body1" style={{ fontWeight: 'bold' }}>
+          Projekt został zakończony, twoje statystyki to:
         </Typography>
-        {/* Wyświetlanie ikon i danych */}
         <Box display="flex" alignItems="center" gap={1}>
           <AttachMoney fontSize="large" style={{ color: '#6a11cb' }} />
           <Typography variant="body1" style={{ fontWeight: 'bold' }}>
@@ -61,9 +61,16 @@ const GameDialog = ({ open, message, onRestart }) => (
           </Typography>
         </Box>
       </Box>
+
+      {/* Sekcja wykresów */}
+      <Box mt={4}>
+        <Typography variant="h6" style={{ fontWeight: 'bold', marginBottom: '16px' }}>
+          Wykres Budżetu i Czasu
+        </Typography>
+        <BudgetTimeChart history={budgetTimeHistory} />
+      </Box>
     </DialogContent>
 
-    {/* Akcje */}
     <DialogActions style={{ justifyContent: 'center', paddingBottom: '15px' }}>
       <Button
         onClick={onRestart}

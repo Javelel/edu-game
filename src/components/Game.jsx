@@ -47,9 +47,9 @@ const Game = () => {
   } = useGameLogic();
 
   return (
-    <Box p={3} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box p={1} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Układ dwóch kolumn */}
-<Box display="flex" flexGrow={1} mt={2} mb={6} style={{ overflowY: 'auto' }}>
+<Box display="flex" flexGrow={1} mb={6} style={{ overflowY: 'auto' }}>
   {/* Tablica zadań */}
   <Box flex={2} mr={2}>
     <TaskStagesGrid
@@ -88,6 +88,7 @@ const Game = () => {
         open={dialogOpen}
         message={dialogMessage}
         onRestart={handleRestart}
+		budgetTimeHistory={budgetTimeHistory}
       />
 
 	  
@@ -111,10 +112,11 @@ const Game = () => {
     display: 'flex', // Ustawienie elementów w rzędzie
     justifyContent: 'space-between', // Wyrównanie elementów z odstępem między nimi
     alignItems: 'flex-end', // Elementy wyrównane do dołu wewnątrz kontenera
+	pointerEvents: 'none',
   }}
 >
   {/* Sekcja wykresów */}
-  <Box style={{ flex: 1, marginRight: '16px' }}>
+  <Box style={{ flex: 1, marginRight: '16px', pointerEvents: 'auto' }}>
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} style={{background: 'linear-gradient(90deg,rgb(178, 95, 255),rgb(243, 123, 254))',}}>
         <Typography style={{color: 'white'}}>Wykresy Budżetu i Czasu</Typography>
@@ -131,6 +133,7 @@ const Game = () => {
       flex: 'none',
       width: '800px',
       marginLeft: 'auto',
+	  pointerEvents: 'auto'
     }}
   >
     {showBlockingNotification ? (
