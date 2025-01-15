@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import GameStats from "./GameStats";
 import TaskStagesGrid from "./TaskStagesGrid";
 import UnexpectedTasksGrid from "./UnexpectedTasksGrid";
@@ -12,16 +12,14 @@ import ProblemNotification from "./ProblemNotification";
 import BlockingNotification from "./BlockingNotification";
 import TaskNotification from "./TaskNotification";
 import ResolveProblemsNotification from "./ResolveProblemsNotification";
-import BudgetTimeChart from './BudgetTimeChart';
+import BudgetTimeChart from "./BudgetTimeChart";
 import StartScreen from "./StartScreen";
 
-import { useDispatch } from 'react-redux'; // Import dispatch
-import { setDialog } from '../redux/reducers/gameReducer';
+import { useDispatch } from "react-redux"; // Import dispatch
+import { setDialog } from "../redux/reducers/gameReducer";
 
-import useGameLogic from "../hooks/useGameLogic";
+import useGameLogic from "../hooks/useGameLogic/useGameLogic";
 import { tasks } from "../data/tasks";
-
-
 
 const Game = () => {
   const [isGameStarted, setIsGameStarted] = useState(false); // Dodany stan
@@ -58,8 +56,8 @@ const Game = () => {
 
   const dispatch = useDispatch();
   const handleCloseDialog = () => {
-	dispatch(setDialog({ open: false, message: '' })); // Zamknięcie dialogu poprzez Redux
-	setIsGameOver(true);
+    dispatch(setDialog({ open: false, message: "" })); // Zamknięcie dialogu poprzez Redux
+    setIsGameOver(true);
   };
 
   if (!isGameStarted) {
@@ -67,9 +65,12 @@ const Game = () => {
   }
 
   return (
-    <Box p={1} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box
+      p={1}
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       {/* Układ dwóch kolumn */}
-      <Box display="flex" flexGrow={1} mb={6} style={{ overflowY: 'auto' }}>
+      <Box display="flex" flexGrow={1} mb={6} style={{ overflowY: "auto" }}>
         {/* Tablica zadań */}
         <Box flex={2} mr={2}>
           <TaskStagesGrid
@@ -87,7 +88,15 @@ const Game = () => {
         </Box>
 
         {/* Problemy, wykresy i statystyki */}
-        <Box flex={1} ml={2} style={{ display: 'flex', flexDirection: 'column', maxWidth: '300px' }}>
+        <Box
+          flex={1}
+          ml={2}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            maxWidth: "300px",
+          }}
+        >
           <GameStats
             budget={budget}
             time={time}
@@ -116,68 +125,79 @@ const Game = () => {
         showTaskNotification ||
         selectedTask ||
         selectedProblem ||
-        showResolveProblemsNotification || isGameOver) && (
+        showResolveProblemsNotification ||
+        isGameOver) && (
+        <Box
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            zIndex: 1000,
+            padding: "10px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            pointerEvents: "none",
+          }}
+        >
+          {/* Sekcja wykresów */}
+          <Box style={{ flex: 1, marginRight: "16px", pointerEvents: "auto" }}>
+            <Accordion defaultExpanded>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                style={{
+                  background:
+                    "linear-gradient(90deg,rgb(178, 95, 255),rgb(243, 123, 254))",
+                }}
+              >
+                <Typography style={{ color: "white" }}>
+                  Wykresy Budżetu i Czasu
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <BudgetTimeChart history={budgetTimeHistory} />
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+
+          {/* Sekcja DecisionBox i powiadomień */}
           <Box
             style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0)',
-              zIndex: 1000,
-              padding: '10px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              pointerEvents: 'none',
+              flex: "none",
+              width: "800px",
+              marginLeft: "auto",
+              pointerEvents: "auto",
             }}
           >
-            {/* Sekcja wykresów */}
-            <Box style={{ flex: 1, marginRight: '16px', pointerEvents: 'auto' }}>
-              <Accordion defaultExpanded>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />} style={{background: 'linear-gradient(90deg,rgb(178, 95, 255),rgb(243, 123, 254))',}}>
-                  <Typography style={{color: 'white'}}>Wykresy Budżetu i Czasu</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <BudgetTimeChart history={budgetTimeHistory} />
-                </AccordionDetails>
-              </Accordion>
-            </Box>
-
-            {/* Sekcja DecisionBox i powiadomień */}
-            <Box
-              style={{
-                flex: 'none',
-                width: '800px',
-                marginLeft: 'auto',
-                pointerEvents: 'auto'
-              }}
-            >
-              {showBlockingNotification ? (
-                <BlockingNotification message={blockingNotificationMessage} />
-              ) : showProblemNotification ? (
-                <ProblemNotification
-                  message={problemNotificationMessage}
-                  onClose={handleCloseProblemNotification}
-                />
-              ) : showTaskNotification ? (
-                <TaskNotification
-                  message={taskNotificationMessage}
-                  onClose={handleCloseTaskNotification}
-                />
-              ) : showResolveProblemsNotification ? (
-                <ResolveProblemsNotification
-                  onClose={() => setShowResolveProblemsNotification(false)}
-                />
-              ) : isGameOver ? (<></>) : (
-                <DecisionBox
-                  selectedItem={selectedTask || selectedProblem}
-                  handleDecision={handleDecision}
-                />
-              )}
-            </Box>
+            {showBlockingNotification ? (
+              <BlockingNotification message={blockingNotificationMessage} />
+            ) : showProblemNotification ? (
+              <ProblemNotification
+                message={problemNotificationMessage}
+                onClose={handleCloseProblemNotification}
+              />
+            ) : showTaskNotification ? (
+              <TaskNotification
+                message={taskNotificationMessage}
+                onClose={handleCloseTaskNotification}
+              />
+            ) : showResolveProblemsNotification ? (
+              <ResolveProblemsNotification
+                onClose={() => setShowResolveProblemsNotification(false)}
+              />
+            ) : isGameOver ? (
+              <></>
+            ) : (
+              <DecisionBox
+                selectedItem={selectedTask || selectedProblem}
+                handleDecision={handleDecision}
+              />
+            )}
           </Box>
-        )}
+        </Box>
+      )}
     </Box>
   );
 };
