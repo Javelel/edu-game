@@ -27,11 +27,8 @@ export default function useHandlers({
   setShowProblemNotification,
   setShowTaskNotification,
 }) {
-  // (1) Wywoływane, kiedy użytkownik wybiera decyzję w zadaniu/problematyce
   const handleDecision = (decision) => {
-    // Specjalny warunek: modyfikacja budżetu/time jednego z zadań
     if (decision.id === 'D-PZ2-3-2') {
-      // Przykład: Modyfikacja taska "PZ3-5" w Implementacji
       setTasks((prevTasks) => {
         const updated = { ...prevTasks };
         updated.Implementacja = updated.Implementacja.map((task) => {
@@ -54,7 +51,6 @@ export default function useHandlers({
     const budgetCost = calculateCost(decision.budgetCost);
     const timeCost   = calculateCost(decision.timeCost);
 
-    // Obsługa ewentualnej dodatkowej puli budżetu (rzut kością)
     if (decision.extraBudget) {
       const { diceRoll, threshold, reward } = decision.extraBudget;
       let sides = 6;
@@ -67,7 +63,6 @@ export default function useHandlers({
 
     dispatch(applyDecision(decision));
 
-    // Jeśli dotyczy to zadania
     if (selectedTask) {
       dispatch(addSolvedTask({
         taskId: selectedTask.id,
@@ -78,7 +73,6 @@ export default function useHandlers({
       }));
       dispatch(setSelectedTask(null));
     }
-    // Jeśli dotyczy problemu
     else if (selectedProblem) {
       dispatch(addSolvedProblem({
         problemId: selectedProblem.id,
@@ -90,18 +84,14 @@ export default function useHandlers({
     }
   };
 
-  // (2) Kiedy gracz wybiera problem z listy
   const handleSelectProblem = (problem) => {
     if (!problem) return;
 
-    // Jeśli mamy powiadomienie blokujące, wyłącz je
     setShowBlockingNotification(false);
     setBlockingNotificationMessage('');
 
-    // Jeśli mamy notyfikację o nowym problemie – wyłącz ją
     setShowProblemNotification(false);
 
-    // Zapamiętanie poprzednio wybranego elementu
     if (selectedTask) {
       setPreviousItem({ type: 'task', item: selectedTask });
     } else if (selectedProblem) {
@@ -112,17 +102,14 @@ export default function useHandlers({
     dispatch(setSelectedTask(null));
   };
 
-  // (3) Zamykanie powiadomienia problemu
   const handleCloseProblemNotification = () => {
     setShowProblemNotification(false);
   };
 
-  // (4) Zamykanie powiadomienia zadań
   const handleCloseTaskNotification = () => {
     setShowTaskNotification(false);
   };
 
-  // (5) Restart gry
   const handleRestart = () => {
     dispatch(restartGame());
     setTasks({ ...initialTasks });
@@ -151,7 +138,6 @@ export default function useHandlers({
   };
 }
 
-// Pomocnicza funkcja do rzutów kością
 function rollDice(sides = 6) {
   return Math.floor(Math.random() * sides + 1);
 }

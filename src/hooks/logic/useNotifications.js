@@ -13,7 +13,6 @@ export default function useNotifications({
   setShowTaskNotification,
   setTaskNotificationMessage,
 }) {
-  // Obsługa kolejki problemów
   useEffect(() => {
     if (!showProblemNotification && problemQueue.length > 0) {
       const nextMessage = problemQueue[0];
@@ -29,7 +28,6 @@ export default function useNotifications({
     setProblemQueue,
   ]);
 
-  // Obsługa kolejki zadań nieprzewidzianych
   useEffect(() => {
     if (!showTaskNotification && taskQueue.length > 0) {
       const nextMessage = taskQueue[0];

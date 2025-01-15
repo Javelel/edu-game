@@ -39,10 +39,9 @@ const gameSlice = createSlice({
 		  actualTimeCost,
 		} = action.payload;
 
-		const allTasks = Object.values(state.tasks).flat(); // Zmienia obiekt `tasks` na jednolitą tablicę
+		const allTasks = Object.values(state.tasks).flat();
 		const task = allTasks.find((t) => t.id === taskId);
 
-  		// Zmniejsz przewidywany budżet i czas
   		if (task) {
     		state.expectedBudget -= task.cost;
     		state.expectedTime -= task.duration;
@@ -82,20 +81,16 @@ const gameSlice = createSlice({
     applyDecision: (state, action) => {
       const decision = action.payload;
 
-      // Oblicz koszty dynamicznie
       const budgetCost = calculateCost(decision.budgetCost);
       const timeCost = calculateCost(decision.timeCost);
 
-      // Aktualizuj budżet i czas
       state.budget -= budgetCost;
       state.time -= timeCost;
 
-      // Dodaj niezadowolenie klienta (jeśli występuje)
       if (decision.customerDissatisfaction) {
         state.customerDissatisfaction += decision.customerDissatisfaction;
       }
 
-      // Aktualizuj szanse wystąpienia problemów
       if (decision.chanceAdjustment) {
         decision.chanceAdjustment.forEach(({ problemId, change }) => {
           state.problemChances[problemId] = (state.problemChances[problemId] || 0) + change;
@@ -107,10 +102,9 @@ const gameSlice = createSlice({
       state.dialogMessage = action.payload.message;
     },
     restartGame: () => {
-		// Resetuj cały stan do początkowego, łącznie z zadaniami
 		return {
 		  ...initialState,
-		  tasks: { ...initialTasks }, // Reset tasków
+		  tasks: { ...initialTasks },
 		};
 	  },
   },

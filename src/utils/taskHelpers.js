@@ -11,7 +11,6 @@ export function getNextUnsolvedTaskWithUnexpected(
   
 	const currentStage = columns[startIndex];
 	
-	// A. Zadania główne
 	const mainTasks = tasks[currentStage] || [];
 	const unsolvedMainTasks = mainTasks.filter(
 	  (task) => !solvedTasks.some((st) => st.taskId === task.id)
@@ -20,7 +19,6 @@ export function getNextUnsolvedTaskWithUnexpected(
 	  return unsolvedMainTasks[0];
 	}
   
-	// B. Zadania nieprzewidziane
 	const currentStageIndex = columns.indexOf(currentStage);
 	const isStageFinished = (stageName) => {
 	  const tasksInThatStage = tasks[stageName] || [];
@@ -43,7 +41,6 @@ export function getNextUnsolvedTaskWithUnexpected(
 	  return unsolvedUnexpected[0];
 	}
   
-	// C. Jeśli brak zadań w tym etapie, przechodzimy do kolejnego
 	return getNextUnsolvedTaskWithUnexpected(
 	  columns,
 	  tasks,

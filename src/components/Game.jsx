@@ -1,28 +1,18 @@
 import React, { useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import GameStats from "./GameStats";
-import TaskStagesGrid from "./TaskStagesGrid";
-import UnexpectedTasksGrid from "./UnexpectedTasksGrid";
-import ProblemsList from "./ProblemsList";
-import DecisionBox from "./DecisionBox";
-import GameDialog from "./GameDialog";
-import ProblemNotification from "./ProblemNotification";
-import BlockingNotification from "./BlockingNotification";
-import TaskNotification from "./TaskNotification";
-import ResolveProblemsNotification from "./ResolveProblemsNotification";
-import BudgetTimeChart from "./BudgetTimeChart";
-import StartScreen from "./StartScreen";
-
-import { useDispatch } from "react-redux"; // Import dispatch
+import { Box } from "@mui/material";
+import { useDispatch } from "react-redux";
 import { setDialog } from "../redux/reducers/gameReducer";
 
-import useGameLogic from "../hooks/useGameLogic/useGameLogic";
+import GameLayout from "./layout/GameLayout";
+import GameNotifications from "./notification/GameNotifications";
+import GameEndDialog from "./GameEndDialog";
+import StartScreen from "./StartScreen";
+
+import useGameLogic from "../hooks/useGameLogic";
 import { tasks } from "../data/tasks";
 
 const Game = () => {
-  const [isGameStarted, setIsGameStarted] = useState(false); // Dodany stan
+  // Logika gry z custom hooka
   const {
     columns,
     budget,
@@ -52,14 +42,18 @@ const Game = () => {
     handleRestart,
   } = useGameLogic();
 
+  // Stan startu i zakończenia gry
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
 
+  // Redux
   const dispatch = useDispatch();
   const handleCloseDialog = () => {
-    dispatch(setDialog({ open: false, message: "" })); // Zamknięcie dialogu poprzez Redux
+    dispatch(setDialog({ open: false, message: "" }));
     setIsGameOver(true);
   };
 
+  // Jeśli gra się nie zaczęła, wyświetlamy ekran startowy
   if (!isGameStarted) {
     return <StartScreen onStart={() => setIsGameStarted(true)} />;
   }
@@ -69,135 +63,49 @@ const Game = () => {
       p={1}
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
-      {/* Układ dwóch kolumn */}
-      <Box display="flex" flexGrow={1} mb={6} style={{ overflowY: "auto" }}>
-        {/* Tablica zadań */}
-        <Box flex={2} mr={2}>
-          <TaskStagesGrid
-            columns={columns}
-            tasks={tasks}
-            solvedTasks={solvedTasks}
-            selectedTask={selectedTask}
-          />
-          <UnexpectedTasksGrid
-            columns={columns}
-            unexpectedTasks={unexpectedTasks}
-            solvedTasks={solvedTasks}
-            selectedTask={selectedTask}
-          />
-        </Box>
-
-        {/* Problemy, wykresy i statystyki */}
-        <Box
-          flex={1}
-          ml={2}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            maxWidth: "300px",
-          }}
-        >
-          <GameStats
-            budget={budget}
-            time={time}
-            customerDissatisfaction={customerDissatisfaction}
-          />
-          <ProblemsList
-            dynamicProblems={dynamicProblems}
-            solvedProblems={solvedProblems}
-            selectedProblem={selectedProblem}
-            onSelectProblem={handleSelectProblem}
-          />
-        </Box>
-      </Box>
+      <GameLayout
+        columns={columns}
+        tasks={tasks}
+        solvedTasks={solvedTasks}
+        selectedTask={selectedTask}
+        unexpectedTasks={unexpectedTasks}
+        dynamicProblems={dynamicProblems}
+        solvedProblems={solvedProblems}
+        selectedProblem={selectedProblem}
+        onSelectProblem={handleSelectProblem}
+        budget={budget}
+        time={time}
+        customerDissatisfaction={customerDissatisfaction}
+      />
 
       {/* Dialog końcowy / restart gry */}
-      <GameDialog
+      <GameEndDialog
         open={dialogOpen}
         message={dialogMessage}
         close={handleCloseDialog}
         budgetTimeHistory={budgetTimeHistory}
       />
 
-      {/* Sekcja powiadomień i decyzji */}
-      {(showBlockingNotification ||
-        showProblemNotification ||
-        showTaskNotification ||
-        selectedTask ||
-        selectedProblem ||
-        showResolveProblemsNotification ||
-        isGameOver) && (
-        <Box
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            zIndex: 1000,
-            padding: "10px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            pointerEvents: "none",
-          }}
-        >
-          {/* Sekcja wykresów */}
-          <Box style={{ flex: 1, marginRight: "16px", pointerEvents: "auto" }}>
-            <Accordion defaultExpanded>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                style={{
-                  background:
-                    "linear-gradient(90deg,rgb(178, 95, 255),rgb(243, 123, 254))",
-                }}
-              >
-                <Typography style={{ color: "white" }}>
-                  Wykresy Budżetu i Czasu
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <BudgetTimeChart history={budgetTimeHistory} />
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-
-          {/* Sekcja DecisionBox i powiadomień */}
-          <Box
-            style={{
-              flex: "none",
-              width: "800px",
-              marginLeft: "auto",
-              pointerEvents: "auto",
-            }}
-          >
-            {showBlockingNotification ? (
-              <BlockingNotification message={blockingNotificationMessage} />
-            ) : showProblemNotification ? (
-              <ProblemNotification
-                message={problemNotificationMessage}
-                onClose={handleCloseProblemNotification}
-              />
-            ) : showTaskNotification ? (
-              <TaskNotification
-                message={taskNotificationMessage}
-                onClose={handleCloseTaskNotification}
-              />
-            ) : showResolveProblemsNotification ? (
-              <ResolveProblemsNotification
-                onClose={() => setShowResolveProblemsNotification(false)}
-              />
-            ) : isGameOver ? (
-              <></>
-            ) : (
-              <DecisionBox
-                selectedItem={selectedTask || selectedProblem}
-                handleDecision={handleDecision}
-              />
-            )}
-          </Box>
-        </Box>
-      )}
+      {/* Sekcja powiadomień, wykresów i decyzji */}
+      <GameNotifications
+        showBlockingNotification={showBlockingNotification}
+        blockingNotificationMessage={blockingNotificationMessage}
+        showProblemNotification={showProblemNotification}
+        problemNotificationMessage={problemNotificationMessage}
+        showTaskNotification={showTaskNotification}
+        taskNotificationMessage={taskNotificationMessage}
+        showResolveProblemsNotification={showResolveProblemsNotification}
+        onCloseResolveProblemsNotification={() =>
+          setShowResolveProblemsNotification(false)
+        }
+        handleCloseProblemNotification={handleCloseProblemNotification}
+        handleCloseTaskNotification={handleCloseTaskNotification}
+        selectedTask={selectedTask}
+        selectedProblem={selectedProblem}
+        handleDecision={handleDecision}
+        budgetTimeHistory={budgetTimeHistory}
+        isGameOver={isGameOver}
+      />
     </Box>
   );
 };
