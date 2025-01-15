@@ -42,7 +42,7 @@ const GameStats = ({
             <Tooltip title={<Typography variant="body2">Niezadowolenie klienta</Typography>}>
               <SentimentDissatisfied fontSize="large" />
             </Tooltip>
-            <Typography variant="body1">{customerDissatisfaction}</Typography>
+            <Typography variant="body1">{customerDissatisfaction} niezadowolenia</Typography>
           </Box>
         </Grid>
       </Grid>
