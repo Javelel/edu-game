@@ -12,7 +12,7 @@ import {
   AccessTime,
   SentimentDissatisfied,
 } from "@mui/icons-material";
-import BudgetTimeChart from "./notification/BudgetTimeChart"; // Import wykresu
+import BudgetTimeChart from "./notification/BudgetTimeChart";
 
 const GameDialog = ({ open, message, close, budgetTimeHistory }) => {
   const getCustomerFeedbackMessage = () => {
@@ -45,8 +45,8 @@ const GameDialog = ({ open, message, close, budgetTimeHistory }) => {
     <Dialog
       open={open}
       onClose={(_, reason) => {
-        if (reason === "backdropClick") return; // Ignoruj kliknięcia w tło
-        close(); // Wywołaj funkcję zamykającą dla innych przypadków
+        if (reason === "backdropClick") return;
+        close();
       }}
       disableEscapeKeyDown
       disableBackdropClick

@@ -22,8 +22,7 @@ import useBudgetTimeHistory from './logic/useBudgetTimeHistory';
 import useNotifications from './logic/useNotifications';
 import useNextTaskSelection from './logic/useNextTaskSelection';
 import useUnexpectedTasks from './logic/useUnexpectedTasks';
-import useProblems from './logic/useProblems';
-import useCompletionCheck from './logic/useCompletionCheck';
+import useGameFlow from './logic/useGameFlow';
 import useHandlers from './logic/useHandlers';
 
 const columns = ["Analiza", "Design", "Implementacja", "Testy", "Wdrożenie"];
@@ -126,7 +125,7 @@ export default function useGameLogic() {
 		unexpectedTasks,
 	});
 
-	useProblems({
+	useGameFlow({
 		columns,
 		tasks,
 		solvedTasks,
@@ -144,21 +143,10 @@ export default function useGameLogic() {
 		customerDissatisfaction,
 		budget,
 		time,
-		setDialog,
-	});
-
-	useCompletionCheck({
-		columns,
-		tasks,
-		solvedTasks,
-		solvedProblems,
-		dynamicProblems,
-		unexpectedTasks,
 		selectedProblem,
 		setShowResolveProblemsNotification,
-		showResolveProblemsNotification,
-		dispatch,
-	});
+		showResolveProblemsNotification
+	  });
 
 	const {
 		handleDecision,

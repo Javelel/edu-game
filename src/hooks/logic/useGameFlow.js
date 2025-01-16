@@ -1,7 +1,12 @@
-import { useEffect } from 'react';
-import { addDynamicProblem, setSelectedTask, setSelectedProblem } from '../../redux/reducers/gameReducer';
+import { useEffect } from "react";
+import {
+  addDynamicProblem,
+  setSelectedTask,
+  setSelectedProblem,
+  setDialog
+} from "../../redux/reducers/gameReducer";
 
-export default function useProblems({
+export default function useGameFlow({
   columns,
   tasks,
   solvedTasks,
@@ -19,10 +24,11 @@ export default function useProblems({
   customerDissatisfaction,
   budget,
   time,
-  setDialog,
+  selectedProblem,
+  setShowResolveProblemsNotification,
+  showResolveProblemsNotification,
 }) {
   useEffect(() => {
-
     setNewProblemJustAdded(false);
 
     let anyProblemAdded = false;
@@ -30,7 +36,12 @@ export default function useProblems({
     columns.forEach((stage) => {
       if (!tasks[stage]) return;
 
-      const allSolvedThisStage = allTasksSolvedForStage(stage, tasks, solvedTasks, unexpectedTasks);
+      const allSolvedThisStage = allTasksSolvedForStage(
+        stage,
+        tasks,
+        solvedTasks,
+        unexpectedTasks
+      );
 
       if (allSolvedThisStage && !stagesWithProblemsAdded.includes(stage)) {
         const newProblemsForStage = [];
@@ -42,6 +53,7 @@ export default function useProblems({
               anyProblemAdded = true;
               newProblemsForStage.push(problem.name);
 
+              // Czyścimy selekcje
               dispatch(setSelectedTask(null));
               dispatch(setSelectedProblem(null));
             }
@@ -51,7 +63,7 @@ export default function useProblems({
         if (newProblemsForStage.length > 0) {
           setProblemQueue((prevQueue) => [
             ...prevQueue,
-            `Nowe problemy w etapie "${stage}": ${newProblemsForStage.join(', ')}`,
+            `Nowe problemy w etapie "${stage}": ${newProblemsForStage.join(", ")}`
           ]);
         }
 
@@ -68,17 +80,36 @@ export default function useProblems({
       .flat()
       .every((task) => solvedTasks.some((st) => st.taskId === task.id));
 
-    const allDynamicProblemsSolved = dynamicProblems.every((p) =>
-      solvedProblems.some((sp) => sp.problemId === p.id)
+    const allUnexpectedTasksSolved = unexpectedTasks.every((ut) =>
+      solvedTasks.some((st) => st.taskId === ut.id)
+    );
+    const allTasksReallySolved = allMainTasksSolved && allUnexpectedTasksSolved;
+
+    // Czy jest jakiś problem, który NIE jest jeszcze rozwiązany?
+    const anyProblemUnsolved = dynamicProblems.some(
+      (p) => !solvedProblems.some((sp) => sp.problemId === p.id)
     );
 
-    if (allMainTasksSolved && allDynamicProblemsSolved) {
+    // Jeśli wszystkie zadania są gotowe, ale mamy problemy 
+    // i żaden nie jest obecnie "selectedProblem", 
+    // to wyświetlamy powiadomienie "Masz problemy do rozwiązania"
+    if (allTasksReallySolved && anyProblemUnsolved && !selectedProblem) {
+      setShowResolveProblemsNotification(true);
+    } else {
+      // Schowaj powiadomienie
+      if (showResolveProblemsNotification) {
+        setShowResolveProblemsNotification(false);
+      }
+    }
+
+    // Jeśli wszystko jest zrobione (zadania i problemy), kończymy grę
+    if (allTasksReallySolved && !anyProblemUnsolved) {
       const message = {
         budget,
         time,
-        customerDissatisfaction,
+        customerDissatisfaction
       };
-      setDialog({ open: true, message });
+      dispatch(setDialog({ open: true, message }));
     }
   }, [
     columns,
@@ -98,7 +129,9 @@ export default function useProblems({
     customerDissatisfaction,
     budget,
     time,
-    setDialog,
+    selectedProblem,
+    setShowResolveProblemsNotification,
+    showResolveProblemsNotification
   ]);
 }
 
@@ -109,7 +142,9 @@ function shouldProblemAppear(problem, solvedTasks, addedProblems) {
 
   if (Array.isArray(problem.condition?.modifiers)) {
     problem.condition.modifiers.forEach((mod) => {
-      const hasModifierDecision = solvedTasks.some((t) => t.decisionId === mod.source);
+      const hasModifierDecision = solvedTasks.some(
+        (t) => t.decisionId === mod.source
+      );
       if (hasModifierDecision) {
         chanceThreshold += mod.adjustment;
       }
@@ -117,7 +152,6 @@ function shouldProblemAppear(problem, solvedTasks, addedProblems) {
   }
 
   const dice = rollDice(6);
-
   return dice >= chanceThreshold;
 }
 
@@ -127,9 +161,13 @@ function rollDice(sides = 6) {
 
 function allTasksSolvedForStage(stage, tasks, solvedTasks, unexpectedTasks) {
   const baseTasks = tasks[stage] || [];
-  const allBase = baseTasks.every((t) => solvedTasks.some((st) => st.taskId === t.id));
+  const allBase = baseTasks.every((t) =>
+    solvedTasks.some((st) => st.taskId === t.id)
+  );
 
-  const unexpectedInStage = unexpectedTasks.filter((ut) => ut.solveStage === stage);
+  const unexpectedInStage = unexpectedTasks.filter(
+    (ut) => ut.solveStage === stage
+  );
   const allUnexpected = unexpectedInStage.every((ut) =>
     solvedTasks.some((st) => st.taskId === ut.id)
   );
